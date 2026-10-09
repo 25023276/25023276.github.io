@@ -629,6 +629,50 @@
             ]
         };
 
+
+        // 保存されたデータを読み込む
+function loadData() {
+    // データを保存する
+function saveData() {
+    // データを変更したときに自動保存する
+function enableAutoSave() {
+    const originalSetItem = localStorage.setItem;
+
+    // stateのデータが変更された際に呼び出す保存処理とは別に、
+    // saveData()を各機能から呼び出して保存する
+}
+    try {
+        // 一時的な処理に使う値は保存しない
+        const dataToSave = {
+            ...state,
+            currentPhotoIndex: 0,
+            photoSlideshowTimer: null
+        };
+
+        localStorage.setItem(
+            'anshinSupportData',
+            JSON.stringify(dataToSave)
+        );
+
+    } catch (error) {
+        console.error('データの保存に失敗しました', error);
+        alert('データを保存できませんでした。写真の容量などを確認してください。');
+    }
+}
+    const savedData = localStorage.getItem('anshinSupportData');
+
+    if (savedData) {
+        try {
+            const data = JSON.parse(savedData);
+
+            // 保存されたデータを現在のstateに反映する
+            Object.assign(state, data);
+
+        } catch (error) {
+            console.error('データの読み込みに失敗しました', error);
+        }
+    }
+}
         let tempPhotoBase64 = null;
 
         /* -------------------------------------------------------------
@@ -1291,8 +1335,12 @@
             state.schedules.sort((a, b) => a.time.localeCompare(b.time));
 
             renderSchedule();
-            document.getElementById('add-schedule-form').reset();
-            alertModal('新しい予定・お薬を登録しました');
+
+// データを保存
+saveData();
+
+document.getElementById('add-schedule-form').reset();
+alertModal('新しい予定・お薬を登録しました');
         }
 
         function handleUpdateFamilyMessage(e) {
