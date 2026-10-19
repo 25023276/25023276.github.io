@@ -633,7 +633,14 @@
         // 保存されたデータを読み込む
 function loadData() {
     // データを保存する
-function saveData() {
+function saveData()
+// データを変更したときに自動保存する
+function enableAutoSave() {
+    const originalSetItem = localStorage.setItem;
+
+    // stateのデータが変更された際に呼び出す保存処理とは別に、
+    // saveData()を各機能から呼び出して保存する
+}{
     // データを変更したときに自動保存する
 function enableAutoSave() {
     const originalSetItem = localStorage.setItem;
