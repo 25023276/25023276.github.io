@@ -589,102 +589,69 @@
         あんしん生活サポート - いつもいっしょ &copy; 2026 シニアサポートシステム
     </footer>
 
+    <!-- JavaScript アプリケーションロジック -->
     <script>
-        /* -------------------------------------------------------------
-           アプリケーション状態 (State Management)
-        ------------------------------------------------------------- */
-        let state = {
-            speechEnabled: true,
-            currentMode: 'elderly', // 'elderly' or 'caregiver'
-            currentTab: 'schedule', // 'schedule', 'contacts', 'games'
-            waterCount: 0,
-            waterGoal: 5,
-            healthStatus: null, // 'genki', 'futsuu', 'darui'
-            currentPhotoIndex: 0,
-            photoSlideshowTimer: null,
-            exerciseDoneToday: 0,
-            stamps: [false, false, false, false, false],
-            
-            // 家族メッセージ
+        // --- 状態管理 ---
+        let speechEnabled = true;
+        let isCaregiverMode = false;
+        let authAnswerValue = 0;
+        
+        let waterCount = 0;
+        let healthStatus = '';
+        let exerciseDoneCount = 0;
+        let galleryPhotoIndex = 0;
+        let galleryBase64Temp = '';
+
+        // アプリケーション全体の初期データ（データ構造を統一）
+        let appData = {
             familyMessage: "きょうも元気にご飯をたべて、お散歩にいこうね！",
-
-            // 写真アルバム（サンプル初期データ）
-            photos: [ ],
-
-            // 予定リスト
             schedules: [
-                { id: 1, time: '08:00', category: '薬', title: 'あさのお薬（朝食後）', done: false, icon: '💊' },
-                { id: 2, time: '10:00', category: '体操', title: '認知症よぼう足踏み体操', done: false, icon: '🦶' },
-                { id: 3, time: '12:30', category: '食事', title: 'ひるご飯とお薬', done: false, icon: '🍱' },
-                { id: 4, time: '15:00', category: '予定', title: 'お散歩とお茶の時間', done: false, icon: '🍵' },
-                { id: 5, time: '19:00', category: '薬', title: 'よるのお薬（夕食後）', done: false, icon: '💊' }
+                { id: 1, category: "薬", time: "08:00", title: "あさの食後薬をのむ", done: false },
+                { id: 2, category: "体操", time: "10:30", title: "すわって足踏み運動", done: false },
+                { id: 3, category: "食事", time: "12:00", title: "お昼ごはん", done: false },
+                { id: 4, category: "薬", time: "18:00", title: "ばんの食後薬をのむ", done: false }
             ],
-
-            // 連絡先リスト
             contacts: [
-                { name: '長男 たろう', phone: '090-1234-5678', relation: '息子', avatar: '👨‍💼', color: 'bg-blue-600' },
-                { name: '長女 はなこ', phone: '090-8765-4321', relation: '娘', avatar: '👩‍💼', color: 'bg-rose-600' },
-                { name: 'デイサービスセンター', phone: '0120-000-000', relation: '施設', avatar: '🚌', color: 'bg-emerald-600' },
-                { name: '担当ヘルパーさん', phone: '080-1111-2222', relation: '介護', avatar: '🧑‍⚕️', color: 'bg-purple-600' }
+                { name: "長女（花子）", phone: "090-1234-5678", icon: "👩", role: "長女" },
+                { name: "長男（太郎）", phone: "090-8765-4321", icon: "👨", role: "長男" },
+                { name: "ケアマネジャー", phone: "03-0000-0000", icon: "🏥", role: "担当者" }
+            ],
+            gallery: [
+                {
+                    url: "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?w=800",
+                    caption: "お孫さんの笑顔の写真です"
+                }
             ]
         };
 
+        // --- 初期化 ---
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLocalStorageData();
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderAll();
+            initNumbersGame();
+            nextJankenRound();
+        });
 
-        // 保存されたデータを読み込む
-function loadData() {
-    // データを保存する
-function saveData()
-// データを変更したときに自動保存する
-function enableAutoSave() {
-    const originalSetItem = localStorage.setItem;
-
-    // stateのデータが変更された際に呼び出す保存処理とは別に、
-    // saveData()を各機能から呼び出して保存する
-}{
-    // データを変更したときに自動保存する
-function enableAutoSave() {
-    const originalSetItem = localStorage.setItem;
-
-    // stateのデータが変更された際に呼び出す保存処理とは別に、
-    // saveData()を各機能から呼び出して保存する
-}
-    try {
-        // 一時的な処理に使う値は保存しない
-        const dataToSave = {
-            ...state,
-            currentPhotoIndex: 0,
-            photoSlideshowTimer: null
-        };
-
-        localStorage.setItem(
-            'anshinSupportData',
-            JSON.stringify(dataToSave)
-        );
-
-    } catch (error) {
-        console.error('データの保存に失敗しました', error);
-        alert('データを保存できませんでした。写真の容量などを確認してください。');
-    }
-}
-    const savedData = localStorage.getItem('anshinSupportData');
-
-    if (savedData) {
-        try {
-            const data = JSON.parse(savedData);
-
-            // 保存されたデータを現在のstateに反映する
-            Object.assign(state, data);
-
-        } catch (error) {
-            console.error('データの読み込みに失敗しました', error);
+        // --- ローカルストレージ連携 ---
+        function saveData() {
+            localStorage.setItem('elderly_support_app_data', JSON.stringify(appData));
         }
-    }
-}
-        let tempPhotoBase64 = null;
 
-        /* -------------------------------------------------------------
-           時計 & 時間帯自動更新
-        ------------------------------------------------------------- */
+        function loadLocalStorageData() {
+            const saved = localStorage.getItem('elderly_support_app_data');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appData = { ...appData, ...parsed };
+                } catch(e) {
+                    console.error("データの読み込みに失敗しました", e);
+                }
+            }
+        }
+
+        // --- 時計・時間帯更新 ---
         function updateClock() {
             const now = new Date();
             const year = now.getFullYear();
@@ -692,336 +659,206 @@ function enableAutoSave() {
             const date = now.getDate();
             const days = ['日', '月', '火', '水', '木', '金', '土'];
             const dayStr = days[now.getDay()];
+            
+            document.getElementById('date-display').innerText = `${year}年${month}月${date}日(${dayStr})`;
 
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-
-            document.getElementById('date-display').innerText = `${year}年${month}月${date}日(${dayStr})`;
             document.getElementById('time-display').innerText = `${hours}:${minutes}`;
 
-            // 時間帯の切り替え
             const h = now.getHours();
             const body = document.getElementById('app-body');
-            const periodBadgeIcon = document.getElementById('time-period-icon');
-            const periodBadgeText = document.getElementById('time-period-text');
-            const recommendText = document.getElementById('recommend-text');
-            const recommendIconBg = document.getElementById('recommend-icon-bg');
+            const icon = document.getElementById('time-period-icon');
+            const text = document.getElementById('time-period-text');
+            const recText = document.getElementById('recommend-text');
+            const recIcon = document.getElementById('recommend-icon-bg');
 
-            body.classList.remove('time-morning', 'time-afternoon', 'time-evening', 'time-night');
+            body.className = "min-h-screen flex flex-col justify-between selection:bg-yellow-200 ";
 
             if (h >= 5 && h < 11) {
                 body.classList.add('time-morning');
-                periodBadgeIcon.innerText = '🌅';
-                periodBadgeText.innerText = 'あさ';
-                recommendText.innerText = 'あさのお薬を飲んで、朝日をあびましょう';
-                recommendIconBg.innerText = '💊';
+                icon.innerText = "🌅";
+                text.innerText = "あさ";
+                recIcon.innerText = "💊";
+                recText.innerText = "あさのお薬と朝食の時間ですよ";
             } else if (h >= 11 && h < 16) {
                 body.classList.add('time-afternoon');
-                periodBadgeIcon.innerText = '☀️';
-                periodBadgeText.innerText = 'ひる';
-                recommendText.innerText = 'お昼ご飯をたべて、水分補給をしましょう';
-                recommendIconBg.innerText = '🍱';
+                icon.innerText = "☀️";
+                text.innerText = "ひる";
+                recIcon.innerText = "🍱";
+                recText.innerText = "お昼ご飯と水分補給の時間です";
             } else if (h >= 16 && h < 19) {
                 body.classList.add('time-evening');
-                periodBadgeIcon.innerText = '🌆';
-                periodBadgeText.innerText = '夕方';
-                recommendText.innerText = 'そろそろ夕食のお薬の準備をしましょう';
-                recommendIconBg.innerText = '🌆';
+                icon.innerText = "🌆";
+                text.innerText = "ゆうがた";
+                recIcon.innerText = "🦶";
+                recText.innerText = "少し体を動かして脳トレをしましょう";
             } else {
                 body.classList.add('time-night');
-                periodBadgeIcon.innerText = '🌙';
-                periodBadgeText.innerText = 'よる';
-                recommendText.innerText = 'ゆっくり休む時間です。戸締りを確認しましょう';
-                recommendIconBg.innerText = '🌙';
+                icon.innerText = "🌙";
+                text.innerText = "よる";
+                recIcon.innerText = "🌙";
+                recText.innerText = "夜のお薬をのんでゆっくり過ごしましょう";
             }
         }
 
-        /* -------------------------------------------------------------
-           音声読み上げ (Text to Speech)
-        ------------------------------------------------------------- */
-        function speakText(text) {
-            if (!state.speechEnabled) return;
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // 前の音声をクリア
-                const uttr = new SpeechSynthesisUtterance(text);
-                uttr.lang = 'ja-JP';
-                uttr.rate = 0.85; // ややゆったりした速度
-                uttr.pitch = 1.0;
-                window.speechSynthesis.speak(uttr);
-            }
+        // --- 画面全体の再描画 ---
+        function renderAll() {
+            renderSchedule();
+            renderContacts();
+            renderGallery();
+            renderStamps();
+            
+            const msgEl = document.getElementById('family-message-text');
+            if (msgEl) msgEl.innerText = `「${appData.familyMessage}」`;
+            
+            const waterEl = document.getElementById('caregiver-water-summary');
+            if (waterEl) waterEl.innerText = `${waterCount} / 5 杯`;
+            
+            const healthEl = document.getElementById('caregiver-health-summary');
+            if (healthEl) healthEl.innerText = healthStatus ? healthStatus : '未記録';
         }
 
+        // --- 音声読み上げ ---
         function toggleSpeech() {
-            state.speechEnabled = !state.speechEnabled;
-            const btnText = document.getElementById('tts-status');
-            const icon = document.getElementById('tts-icon');
-            if (state.speechEnabled) {
-                btnText.innerText = 'よみあげ: オン';
-                icon.className = 'fas fa-volume-up text-lg md:text-xl';
-                speakText('よみあげをオンにしました');
-            } else {
-                btnText.innerText = 'よみあげ: オフ';
-                icon.className = 'fas fa-volume-mute text-lg md:text-xl';
-            }
+            speechEnabled = !speechEnabled;
+            const statusStr = speechEnabled ? "よみあげ: オン" : "よみあげ: オフ";
+            document.getElementById('tts-status').innerText = statusStr;
+            document.getElementById('tts-icon').className = speechEnabled ? "fas fa-volume-up text-lg md:text-xl" : "fas fa-volume-mute text-lg md:text-xl";
+            if (speechEnabled) speakText("音声読み上げをオンにしました");
         }
 
-        /* -------------------------------------------------------------
-           写真スライドショー
-        ------------------------------------------------------------- */
-        function renderPhotoSlideshow() {
-            const container = document.getElementById('photo-slideshow-container');
-            const captionText = document.getElementById('photo-caption-text');
-
-            if (state.photos.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 font-bold">写真が登録されていません</div>`;
-                captionText.innerText = '家族写真を登録できます';
-                return;
-            }
-
-            const photo = state.photos[state.currentPhotoIndex];
-            container.innerHTML = `
-                <img src="${photo.url}" alt="家族写真" class="max-h-full max-w-full object-contain rounded-xl shadow-md transition-all duration-500">
-            `;
-            captionText.innerText = photo.caption;
+        function speakText(text) {
+            if (!speechEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const uttr = new SpeechSynthesisUtterance(text);
+            uttr.lang = 'ja-JP';
+            uttr.rate = 0.9;
+            window.speechSynthesis.speak(uttr);
         }
 
-        function nextPhoto() {
-            if (state.photos.length === 0) return;
-            state.currentPhotoIndex = (state.currentPhotoIndex + 1) % state.photos.length;
-            renderPhotoSlideshow();
-        }
-
-        function prevPhoto() {
-            if (state.photos.length === 0) return;
-            state.currentPhotoIndex = (state.currentPhotoIndex - 1 + state.photos.length) % state.photos.length;
-            renderPhotoSlideshow();
-        }
-
-        function startPhotoTimer() {
-            if (state.photoSlideshowTimer) clearInterval(state.photoSlideshowTimer);
-            state.photoSlideshowTimer = setInterval(() => {
-                nextPhoto();
-            }, 7000);
-        }
-
-        function speakPhotoCaption() {
-            const caption = document.getElementById('photo-caption-text').innerText;
-            speakText(caption);
-        }
-
-        /* -------------------------------------------------------------
-           体調記録 & 水分補給
-        ------------------------------------------------------------- */
-        function recordHealth(type) {
-            state.healthStatus = type;
-            const badge = document.getElementById('health-status-badge');
-            const cSummary = document.getElementById('caregiver-health-summary');
-
-            document.getElementById('btn-health-genki').classList.remove('bg-emerald-200', 'ring-4', 'ring-emerald-500');
-            document.getElementById('btn-health-futsuu').classList.remove('bg-blue-200', 'ring-4', 'ring-blue-500');
-            document.getElementById('btn-health-darui').classList.remove('bg-amber-200', 'ring-4', 'ring-amber-500');
-
-            if (type === 'genki') {
-                badge.innerText = '元気！';
-                badge.className = 'text-xs font-bold px-2 py-1 bg-emerald-200 text-emerald-900 rounded-lg';
-                cSummary.innerText = '元気😊';
-                document.getElementById('btn-health-genki').classList.add('bg-emerald-200', 'ring-4', 'ring-emerald-500');
-                speakText('元気ですね！今日も素敵な1日にしましょう');
-            } else if (type === 'futsuu') {
-                badge.innerText = 'ふつう';
-                badge.className = 'text-xs font-bold px-2 py-1 bg-blue-200 text-blue-900 rounded-lg';
-                cSummary.innerText = 'ふつう🙂';
-                document.getElementById('btn-health-futsuu').classList.add('bg-blue-200', 'ring-4', 'ring-blue-500');
-                speakText('無理をせず過ごしてくださいね');
-            } else if (type === 'darui') {
-                badge.innerText = 'だるい';
-                badge.className = 'text-xs font-bold px-2 py-1 bg-amber-200 text-amber-900 rounded-lg';
-                cSummary.innerText = 'だるい🥺';
-                document.getElementById('btn-health-darui').classList.add('bg-amber-200', 'ring-4', 'ring-amber-500');
-                speakText('だるいときは横になって休んでくださいね');
-            }
-
-            addStamp(0); // 体調記録でスタンプ1個目獲得
-        }
-
-        function addWaterGlass() {
-            state.waterCount += 1;
-            document.getElementById('water-count-display').innerText = state.waterCount;
-            document.getElementById('caregiver-water-summary').innerText = `${state.waterCount} / ${state.waterGoal} 杯`;
-
-            confetti({
-                particleCount: 25,
-                spread: 40,
-                origin: { y: 0.7 }
-            });
-
-            speakText(`お水を${state.waterCount}杯飲みました。素晴らしいです！`);
-
-            if (state.waterCount >= 3) {
-                addStamp(1); // 水分補給でスタンプ獲得
-            }
-        }
-
-        /* -------------------------------------------------------------
-           スタンプ帳 & スケジュールレンダリング
-        ------------------------------------------------------------- */
-        function addStamp(index) {
-            if (!state.stamps[index]) {
-                state.stamps[index] = true;
-                renderStamps();
-                confetti({
-                    particleCount: 80,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-            }
-        }
-
-        function renderStamps() {
-            const grid = document.getElementById('stamp-grid');
-            grid.innerHTML = '';
-            let count = 0;
-
-            const stampLabels = ['体調', '水分', 'お薬', '運動', '笑顔'];
-
-            state.stamps.forEach((earned, idx) => {
-                if (earned) count++;
-                const stampBox = document.createElement('div');
-                stampBox.className = 'flex flex-col items-center';
-                
-                if (earned) {
-                    stampBox.innerHTML = `
-                        <div class="w-12 h-12 md:w-16 md:h-16 bg-yellow-400 text-yellow-950 rounded-full flex items-center justify-center border-4 border-yellow-600 font-black text-2xl shadow animate-stamp">
-                            💮
-                        </div>
-                        <span class="text-xs font-extrabold text-amber-900 mt-1">${stampLabels[idx]}</span>
-                    `;
-                } else {
-                    stampBox.innerHTML = `
-                        <div class="w-12 h-12 md:w-16 md:h-16 bg-amber-200/60 border-2 border-dashed border-amber-400 rounded-full flex items-center justify-center text-amber-500 font-bold text-sm">
-                            ${idx + 1}
-                        </div>
-                        <span class="text-xs font-bold text-amber-700/60 mt-1">${stampLabels[idx]}</span>
-                    `;
-                }
-                grid.appendChild(stampBox);
-            });
-
-            document.getElementById('stamp-count-text').innerText = `${count} 個ゲット！`;
-            document.getElementById('caregiver-stamp-summary').innerText = `${count} 個`;
-        }
-
+        // --- 予定の描画と追加・削除 ---
         function renderSchedule() {
             const container = document.getElementById('elderly-schedule-list');
             const caregiverContainer = document.getElementById('caregiver-schedule-list');
-            container.innerHTML = '';
-            caregiverContainer.innerHTML = '';
+            
+            if (container) container.innerHTML = '';
+            if (caregiverContainer) caregiverContainer.innerHTML = '';
 
-            let doneCount = 0;
+            let completedCount = 0;
 
-            state.schedules.forEach((item) => {
-                if (item.done) doneCount++;
+            appData.schedules.forEach((item) => {
+                if (item.done) completedCount++;
 
-                // 本人画面用カード
-                const card = document.createElement('div');
-                card.className = `p-4 md:p-5 rounded-3xl border-4 flex items-center justify-between shadow-md transition-all ${
-                    item.done 
-                        ? 'bg-slate-100 border-slate-300 opacity-70' 
-                        : 'bg-white border-blue-500'
-                }`;
+                // 本人画面用
+                if (container) {
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-3xl border-4 flex items-center justify-between shadow-md transition-all ${
+                        item.done ? 'bg-slate-100 border-slate-300 opacity-60' : 'bg-white border-blue-500'
+                    }`;
 
-                card.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="text-3xl md:text-4xl p-3 bg-blue-100 rounded-2xl flex-shrink-0">
-                            ${item.icon || '📅'}
-                        </div>
-                        <div>
-                            <div class="text-lg md:text-xl font-extrabold text-blue-900">${item.time}</div>
-                            <div class="text-xl md:text-2xl font-black text-slate-900 ${item.done ? 'line-through text-slate-500' : ''}">
-                                ${item.title}
+                    card.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <div class="text-2xl font-black bg-blue-100 text-blue-900 px-3 py-2 rounded-2xl border border-blue-300">
+                                ${item.time}
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900">${item.category}</span>
+                                <div class="text-xl md:text-2xl font-black ${item.done ? 'line-through text-slate-500' : 'text-slate-900'}">
+                                    ${item.title}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        ${item.done ? `
-                            <span class="bg-emerald-600 text-white font-black px-4 py-3 rounded-2xl text-lg flex items-center">
-                                <i class="fas fa-check mr-1"></i>できた！
-                            </span>
-                        ` : `
-                            <button onclick="markScheduleDone(${item.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-5 py-3 rounded-2xl text-xl border-2 border-emerald-800 shadow active:scale-95">
-                                できた！
-                            </button>
-                        `}
-                    </div>
-                `;
-                container.appendChild(card);
+                        <button onclick="toggleScheduleDone(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow flex items-center space-x-1 ${
+                            item.done ? 'bg-slate-300 text-slate-700 border-slate-400' : 'bg-emerald-600 text-white border-emerald-900 active:scale-95'
+                        }">
+                            <i class="fas ${item.done ? 'fa-check-circle' : 'fa-circle'} text-xl"></i>
+                            <span>${item.done ? 'できた！' : 'できた！'}</span>
+                        </button>
+                    `;
+                    container.appendChild(card);
+                }
 
-                // 介護者用管理リスト
-                const cItem = document.createElement('div');
-                cItem.className = 'flex items-center justify-between p-3 bg-slate-100 rounded-xl border border-slate-300';
-                cItem.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <span class="font-bold text-blue-900">${item.time}</span>
-                        <span class="font-black text-slate-800">${item.title}</span>
-                        ${item.done ? '<span class="text-xs bg-emerald-200 text-emerald-800 font-bold px-2 py-0.5 rounded">完了</span>' : ''}
-                    </div>
-                    <button onclick="deleteSchedule(${item.id})" class="text-red-600 hover:text-red-800 font-bold text-sm px-2 py-1">
-                        <i class="fas fa-trash"></i> 削除
-                    </button>
-                `;
-                caregiverContainer.appendChild(cItem);
+                // 介護者画面用
+                if (caregiverContainer) {
+                    const cCard = document.createElement('div');
+                    cCard.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border border-slate-300";
+                    cCard.innerHTML = `
+                        <span>[${item.time}] (${item.category}) ${item.title}</span>
+                        <button onclick="deleteSchedule(${item.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
+                    `;
+                    caregiverContainer.appendChild(cCard);
+                }
             });
 
-            document.getElementById('schedule-progress-text').innerText = `${doneCount} / ${state.schedules.length} 完了`;
+            const progressEl = document.getElementById('schedule-progress-text');
+            if (progressEl) progressEl.innerText = `${completedCount} / ${appData.schedules.length} 完了`;
+            
+            renderStamps();
+        }
 
-            if (doneCount >= 1) {
-                addStamp(2); // お薬・予定完了でスタンプ獲得
+        function toggleScheduleDone(id) {
+            const item = appData.schedules.find(s => s.id === id);
+            if (item) {
+                item.done = !item.done;
+                if (item.done) {
+                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+                    speakText(`${item.title}、よくできました！スタンプを押しました！`);
+                }
+                saveData();
+                renderSchedule();
             }
         }
 
-        function markScheduleDone(id) {
-            const item = state.schedules.find(s => s.id === id);
-            if (item) {
-                item.done = true;
-                renderSchedule();
-                speakText(`${item.title}、大変よくできました！`);
-                confetti({
-                    particleCount: 50,
-                    spread: 60,
-                    origin: { y: 0.7 }
-                });
-            }
+        function handleAddSchedule(e) {
+            e.preventDefault();
+            const cat = document.getElementById('input-category').value;
+            const time = document.getElementById('input-time').value;
+            const title = document.getElementById('input-title').value;
+
+            appData.schedules.push({
+                id: Date.now(),
+                category: cat,
+                time: time,
+                title: title,
+                done: false
+            });
+
+            appData.schedules.sort((a, b) => a.time.localeCompare(b.time));
+
+            document.getElementById('input-title').value = '';
+            saveData();
+            renderSchedule();
+            alert("予定を追加しました");
         }
 
         function deleteSchedule(id) {
-            state.schedules = state.schedules.filter(s => s.id !== id);
-            renderSchedule();
-
-            // 削除後のデータを保存
+            appData.schedules = appData.schedules.filter(s => s.id !== id);
             saveData();
+            renderSchedule();
         }
 
-        /* -------------------------------------------------------------
-           連絡先 & 電話発信
-        ------------------------------------------------------------- */
+        // --- 連絡先描画 ---
         function renderContacts() {
             const container = document.getElementById('elderly-contacts-list');
+            if (!container) return;
             container.innerHTML = '';
 
-            state.contacts.forEach((c) => {
+            appData.contacts.forEach(contact => {
                 const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded-3xl border-4 border-emerald-500 shadow-md flex items-center justify-between';
+                card.className = "bg-white border-4 border-emerald-500 rounded-3xl p-4 shadow-md flex items-center justify-between";
                 card.innerHTML = `
                     <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 ${c.color} text-white rounded-2xl flex items-center justify-center text-3xl font-black shadow">
-                            ${c.avatar}
+                        <div class="w-16 h-16 bg-emerald-100 text-emerald-900 rounded-2xl flex items-center justify-center text-4xl shadow border border-emerald-300">
+                            ${contact.icon}
                         </div>
                         <div>
-                            <span class="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-md">${c.relation}</span>
-                            <div class="text-xl md:text-2xl font-black text-slate-900 mt-0.5">${c.name}</div>
+                            <div class="text-xs font-bold text-emerald-800">${contact.role}</div>
+                            <div class="text-2xl font-black text-slate-900">${contact.name}</div>
+                            <div class="text-sm font-bold text-slate-500">${contact.phone}</div>
                         </div>
                     </div>
-                    <a href="tel:${c.phone}" onclick="speakText('${c.name}さんにお電話します')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-2xl text-xl border-2 border-emerald-900 shadow flex items-center space-x-2">
+                    <a href="tel:${contact.phone}" onclick="speakText('${contact.name}さんへ電話をかけます')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-2xl text-xl border-2 border-emerald-900 shadow active:scale-95 flex items-center space-x-2">
                         <i class="fas fa-phone"></i>
                         <span>かける</span>
                     </a>
@@ -1031,413 +868,397 @@ function enableAutoSave() {
         }
 
         function triggerEmergencyCall() {
-            showCustomModal(
-                '🚨 119番（救急通報）',
-                '本当に119番に電話をかけますか？体調が急変したときや緊急時のみ押してください。',
-                `<a href="tel:119" class="bg-red-600 text-white font-black px-6 py-3 rounded-2xl text-lg mr-2">119番にかける</a>
-                 <button onclick="closeCustomModal()" class="bg-slate-300 text-slate-800 font-bold px-4 py-3 rounded-2xl text-base">キャンセル</button>`
-            );
-        }
-
-        /* -------------------------------------------------------------
-           脳トレ・足踏み体操（コグニサイズ）
-        ------------------------------------------------------------- */
-        let cogniState = {
-            active: false,
-            count: 1,
-            timer: null,
-            speed: 1200 // ミリ秒
-        };
-
-        function toggleCogniExercise() {
-            cogniState.active = !cogniState.active;
-            const btnText = document.getElementById('cogni-play-text');
-            const btnIcon = document.getElementById('cogni-play-icon');
-
-            if (cogniState.active) {
-                btnText.innerText = '体操ストップ';
-                btnIcon.className = 'fas fa-stop';
-                cogniState.count = 1;
-                runCogniStep();
-                cogniState.timer = setInterval(runCogniStep, cogniState.speed);
-            } else {
-                btnText.innerText = '体操スタート';
-                btnIcon.className = 'fas fa-play';
-                if (cogniState.timer) clearInterval(cogniState.timer);
+            if (confirm("119番（救急）へ電話をかけますか？")) {
+                window.location.href = "tel:119";
             }
         }
 
-        function runCogniStep() {
-            const numDisplay = document.getElementById('cogni-count-num');
-            const hintDisplay = document.getElementById('cogni-action-hint');
-            const leftFoot = document.getElementById('step-left-foot');
-            const rightFoot = document.getElementById('step-right-foot');
+        // --- フォトギャラリー ---
+        function renderGallery() {
+            const container = document.getElementById('photo-slideshow-container');
+            if (!container) return;
 
-            numDisplay.innerText = cogniState.count;
-
-            // 奇数は左足、偶数は右足
-            if (cogniState.count % 2 !== 0) {
-                leftFoot.className = 'w-20 h-24 bg-purple-600 text-white rounded-2xl flex flex-col items-center justify-center border-4 border-purple-900 shadow-lg scale-110 transition-all';
-                rightFoot.className = 'w-20 h-24 bg-slate-200 text-slate-700 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 opacity-60 transition-all';
-            } else {
-                rightFoot.className = 'w-20 h-24 bg-purple-600 text-white rounded-2xl flex flex-col items-center justify-center border-4 border-purple-900 shadow-lg scale-110 transition-all';
-                leftFoot.className = 'w-20 h-24 bg-slate-200 text-slate-700 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 opacity-60 transition-all';
+            if (!appData.gallery || appData.gallery.length === 0) {
+                container.innerHTML = `<span class="text-slate-400 font-bold">写真が登録されていません</span>`;
+                return;
             }
-
-            // 3の倍数は手拍子！
-            if (cogniState.count % 3 === 0) {
-                hintDisplay.innerText = '👏 手をたたいて！';
-                hintDisplay.className = 'text-2xl md:text-3xl font-black text-red-600 mt-2 animate-bounce';
-                speakText(`手拍子！${cogniState.count}`);
-            } else {
-                hintDisplay.innerText = 'あしぶみ';
-                hintDisplay.className = 'text-xl md:text-2xl font-extrabold text-slate-600 mt-2';
-            }
-
-            cogniState.count++;
-            if (cogniState.count > 15) {
-                toggleCogniExercise();
-                speakText('体操お疲れ様でした！素晴らしいです');
-                addStamp(3); // 運動でスタンプ獲得
-                state.exerciseDoneToday++;
-                document.getElementById('exercise-done-count').innerText = state.exerciseDoneToday;
-            }
+            const current = appData.gallery[galleryPhotoIndex % appData.gallery.length];
+            container.innerHTML = `<img src="${current.url}" class="max-h-full max-w-full object-contain rounded-xl shadow">`;
+            
+            const captionEl = document.getElementById('photo-caption-text');
+            if (captionEl) captionEl.innerText = current.caption;
         }
 
-        function changeCogniSpeed() {
-            const btn = document.getElementById('cogni-speed-btn');
-            if (cogniState.speed === 1200) {
-                cogniState.speed = 800; // はやい
-                btn.innerText = 'はやさ: はやい';
-            } else {
-                cogniState.speed = 1200; // ふつう
-                btn.innerText = 'はやさ: ふつう';
-            }
-            if (cogniState.active) {
-                clearInterval(cogniState.timer);
-                cogniState.timer = setInterval(runCogniStep, cogniState.speed);
-            }
+        function prevPhoto() {
+            if (!appData.gallery || appData.gallery.length === 0) return;
+            galleryPhotoIndex = (galleryPhotoIndex - 1 + appData.gallery.length) % appData.gallery.length;
+            renderGallery();
         }
 
-        /* -------------------------------------------------------------
-           後出しじゃんけん
-        ------------------------------------------------------------- */
-        let jankenState = {
-            targetHand: '✊',
-            mustWin: true
-        };
-
-        function initJanken() {
-            const hands = ['✊', '✌️', '✋'];
-            const randomHand = hands[Math.floor(Math.random() * hands.length)];
-            const winOrLose = Math.random() > 0.5;
-
-            jankenState.targetHand = randomHand;
-            jankenState.mustWin = winOrLose;
-
-            document.getElementById('janken-opponent-hand').innerText = randomHand;
-            const ruleLabel = document.getElementById('janken-rule-label');
-
-            if (winOrLose) {
-                ruleLabel.innerText = '👈 これに「勝ってください」！';
-                ruleLabel.className = 'text-xl font-extrabold text-red-600 mb-2';
-                speakText(`相手は${randomHand}です。勝ってください！`);
-            } else {
-                ruleLabel.innerText = '👈 これに「負けてください」！';
-                ruleLabel.className = 'text-xl font-extrabold text-blue-600 mb-2';
-                speakText(`相手は${randomHand}です。負けてください！`);
-            }
-
-            document.getElementById('janken-result-msg').innerText = '';
+        function nextPhoto() {
+            if (!appData.gallery || appData.gallery.length === 0) return;
+            galleryPhotoIndex = (galleryPhotoIndex + 1) % appData.gallery.length;
+            renderGallery();
         }
 
-        function checkJankenAnswer(userHand) {
-            const target = jankenState.targetHand;
-            let isWin = false;
-
-            if (jankenState.mustWin) {
-                if (
-                    (userHand === '✊' && target === '✌️') ||
-                    (userHand === '✌️' && target === '✋') ||
-                    (userHand === '✋' && target === '✊')
-                ) {
-                    isWin = true;
-                }
-            } else {
-                if (
-                    (userHand === '✊' && target === '✋') ||
-                    (userHand === '✌️' && target === '✊') ||
-                    (userHand === '✋' && target === '✌️')
-                ) {
-                    isWin = true;
-                }
-            }
-
-            const resMsg = document.getElementById('janken-result-msg');
-            if (isWin) {
-                resMsg.innerText = '⭕ 正解です！すばらしい！';
-                resMsg.className = 'text-2xl font-black text-emerald-600';
-                speakText('正解です！すばらしい！');
-                confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
-                setTimeout(initJanken, 2000);
-            } else {
-                resMsg.innerText = '❌ おしい！もう一度チャレンジしてみましょう';
-                resMsg.className = 'text-2xl font-black text-amber-600';
-                speakText('おしい！もう一度やってみましょう');
-            }
-        }
-
-        /* -------------------------------------------------------------
-           123数字タッチ
-        ------------------------------------------------------------- */
-        let numberGameState = {
-            currentNumber: 1
-        };
-
-        function initNumbersGame() {
-            numberGameState.currentNumber = 1;
-            document.getElementById('target-number').innerText = '1';
-            const grid = document.getElementById('numbers-grid');
-            grid.innerHTML = '';
-
-            let nums = [1, 2, 3, 4, 5, 6];
-            nums.sort(() => Math.random() - 0.5);
-
-            nums.forEach((n) => {
-                const btn = document.createElement('button');
-                btn.className = 'bg-purple-600 hover:bg-purple-700 text-white font-black text-3xl py-5 rounded-2xl border-4 border-purple-900 shadow-md active:scale-95';
-                btn.innerText = n;
-                btn.onclick = () => handleNumberClick(n, btn);
-                grid.appendChild(btn);
-            });
-
-            speakText('1から順番に数字を押してください');
-        }
-
-        function handleNumberClick(num, btn) {
-            if (num === numberGameState.currentNumber) {
-                btn.className = 'bg-slate-300 text-slate-500 font-black text-3xl py-5 rounded-2xl border-2 border-slate-400 cursor-not-allowed opacity-50';
-                btn.onclick = null;
-
-                numberGameState.currentNumber++;
-                if (numberGameState.currentNumber > 6) {
-                    speakText('ぜんぶ押せました！大成功です！');
-                    confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
-                    addStamp(4); // 脳トレ完成でスタンプ
-                    setTimeout(initNumbersGame, 2500);
-                } else {
-                    document.getElementById('target-number').innerText = numberGameState.currentNumber;
-                    speakText(`${num}！次は${numberGameState.currentNumber}`);
-                }
-            } else {
-                speakText(`ちがいます。次は${numberGameState.currentNumber}を押してください`);
-            }
-        }
-
-        /* -------------------------------------------------------------
-           タブ切り替え & モード切り替え
-        ------------------------------------------------------------- */
-        function switchElderlyTab(tab) {
-            state.currentTab = tab;
-            const scheduleSec = document.getElementById('tab-content-schedule');
-            const contactsSec = document.getElementById('tab-content-contacts');
-            const gamesSec = document.getElementById('tab-content-games');
-
-            const scheduleBtn = document.getElementById('tab-schedule-btn');
-            const contactsBtn = document.getElementById('tab-contacts-btn');
-            const gamesBtn = document.getElementById('tab-games-btn');
-
-            scheduleSec.classList.add('hidden');
-            contactsSec.classList.add('hidden');
-            gamesSec.classList.add('hidden');
-
-            scheduleBtn.classList.add('opacity-60');
-            contactsBtn.classList.add('opacity-60');
-            gamesBtn.classList.add('opacity-60');
-
-            if (tab === 'schedule') {
-                scheduleSec.classList.remove('hidden');
-                scheduleBtn.classList.remove('opacity-60');
-            } else if (tab === 'contacts') {
-                contactsSec.classList.remove('hidden');
-                contactsBtn.classList.remove('opacity-60');
-            } else if (tab === 'games') {
-                gamesSec.classList.remove('hidden');
-                gamesBtn.classList.remove('opacity-60');
-                selectGame('cogni');
-            }
-        }
-
-        function selectGame(game) {
-            const cogniContainer = document.getElementById('game-cogni-container');
-            const jankenContainer = document.getElementById('game-janken-container');
-            const numbersContainer = document.getElementById('game-numbers-container');
-
-            const btnCogni = document.getElementById('game-select-cogni');
-            const btnJanken = document.getElementById('game-select-janken');
-            const btnNumbers = document.getElementById('game-select-numbers');
-
-            cogniContainer.classList.add('hidden');
-            jankenContainer.classList.add('hidden');
-            numbersContainer.classList.add('hidden');
-
-            btnCogni.className = 'py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400';
-            btnJanken.className = 'py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400';
-            btnNumbers.className = 'py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400';
-
-            if (game === 'cogni') {
-                cogniContainer.classList.remove('hidden');
-                btnCogni.className = 'py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-900 shadow';
-            } else if (game === 'janken') {
-                jankenContainer.classList.remove('hidden');
-                btnJanken.className = 'py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-900 shadow';
-                initJanken();
-            } else if (game === 'numbers') {
-                numbersContainer.classList.remove('hidden');
-                btnNumbers.className = 'py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-900 shadow';
-                initNumbersGame();
-            }
-        }
-
-        function openModeSwitchModal() {
-            if (state.currentMode === 'elderly') {
-                showCustomModal(
-                    '介護者モードへ切り替え',
-                    'ご家族・ヘルパーさん向けの管理画面を開きますか？',
-                    `<button onclick="switchToCaregiverMode(); closeCustomModal();" class="bg-slate-800 text-white font-black px-6 py-3 rounded-2xl text-lg mr-2">切り替える</button>
-                     <button onclick="closeCustomModal()" class="bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-2xl text-base">戻る</button>`
-                );
-            } else {
-                switchToElderlyMode();
-            }
-        }
-
-        function switchToCaregiverMode() {
-            state.currentMode = 'caregiver';
-            document.getElementById('elderly-view').classList.add('hidden');
-            document.getElementById('caregiver-view').classList.remove('hidden');
-            document.getElementById('current-mode-label').innerText = '本人画面へ戻る';
-        }
-
-        function switchToElderlyMode() {
-            state.currentMode = 'elderly';
-            document.getElementById('caregiver-view').classList.add('hidden');
-            document.getElementById('elderly-view').classList.remove('hidden');
-            document.getElementById('current-mode-label').innerText = '家族モードへ';
-        }
-
-        /* -------------------------------------------------------------
-           介護者フォーム処理 (Form Submissions)
-        ------------------------------------------------------------- */
-        function handleAddSchedule(e) {
-            e.preventDefault();
-            const time = document.getElementById('input-time').value;
-            const category = document.getElementById('input-category').value;
-            const title = document.getElementById('input-title').value;
-
-            let icon = '📅';
-            if (category === '薬') icon = '💊';
-            if (category === '体操') icon = '🦶';
-            if (category === '食事') icon = '🍱';
-
-            const newId = Date.now();
-            state.schedules.push({ id: newId, time, category, title, done: false, icon });
-            state.schedules.sort((a, b) => a.time.localeCompare(b.time));
-
-            renderSchedule();
-
-// データを保存
-saveData();
-
-document.getElementById('add-schedule-form').reset();
-alertModal('新しい予定・お薬を登録しました');
-        }
-
-        function handleUpdateFamilyMessage(e) {
-            e.preventDefault();
-            const msg = document.getElementById('input-family-msg').value;
-            state.familyMessage = msg;
-            document.getElementById('family-message-text').innerText = msg;
-            alertModal('伝言メッセージを更新しました');
+        function speakPhotoCaption() {
+            const captionEl = document.getElementById('photo-caption-text');
+            if (captionEl) speakText(captionEl.innerText);
         }
 
         function handleGalleryPhotoSelect(e) {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    tempPhotoBase64 = evt.target.result;
-                    document.getElementById('gallery-preview-img').src = tempPhotoBase64;
-                    document.getElementById('gallery-preview-container').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                galleryBase64Temp = evt.target.result;
+                const imgPreview = document.getElementById('gallery-preview-img');
+                const containerPreview = document.getElementById('gallery-preview-container');
+                if (imgPreview) imgPreview.src = galleryBase64Temp;
+                if (containerPreview) containerPreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
         }
 
         function handleAddGalleryPhoto(e) {
             e.preventDefault();
             const caption = document.getElementById('input-gallery-caption').value;
-            if (!tempPhotoBase64) return;
+            if (!galleryBase64Temp) return;
 
-            state.photos.push({
-                url: tempPhotoBase64,
+            appData.gallery.unshift({
+                url: galleryBase64Temp,
                 caption: caption
             });
 
-            state.currentPhotoIndex = state.photos.length - 1;
-            renderPhotoSlideshow();
+            galleryBase64Temp = '';
+            document.getElementById('input-gallery-caption').value = '';
+            document.getElementById('input-gallery-photo').value = '';
+            
+            const containerPreview = document.getElementById('gallery-preview-container');
+            if (containerPreview) containerPreview.classList.add('hidden');
 
-            document.getElementById('add-gallery-form').reset();
-            document.getElementById('gallery-preview-container').classList.add('hidden');
-            tempPhotoBase64 = null;
-
-            alertModal('新しいアルバム写真を登録しました');
+            saveData();
+            renderGallery();
+            alert("家族アルバムに新しい写真を追加しました！");
         }
 
-        /* -------------------------------------------------------------
-           カスタムモーダル ダイアログ
-        ------------------------------------------------------------- */
-        function showCustomModal(title, bodyText, actionsHtml = null) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-body').innerText = bodyText;
-            const actionsDiv = document.getElementById('modal-actions');
+        // --- スタンプ帳 ---
+        function renderStamps() {
+            const grid = document.getElementById('stamp-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
 
-            if (actionsHtml) {
-                actionsDiv.innerHTML = actionsHtml;
+            let count = appData.schedules.filter(s => s.done).length;
+            if (waterCount >= 5) count++;
+            if (healthStatus) count++;
+
+            const totalStamps = Math.min(count, 5);
+            
+            const stampText = document.getElementById('stamp-count-text');
+            if (stampText) stampText.innerText = `${totalStamps} 個ゲット！`;
+            
+            const caregiverStampText = document.getElementById('caregiver-stamp-summary');
+            if (caregiverStampText) caregiverStampText.innerText = `${totalStamps} 個`;
+
+            for (let i = 0; i < 5; i++) {
+                const isStamped = i < totalStamps;
+                const slot = document.createElement('div');
+                slot.className = `w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-3xl border-4 ${
+                    isStamped ? 'bg-yellow-400 border-amber-600 text-amber-950 animate-stamp shadow-lg' : 'bg-white/50 border-amber-300/60 text-amber-200'
+                }`;
+                slot.innerText = '💮';
+                grid.appendChild(slot);
+            }
+        }
+
+        // --- 体調・水分記録 ---
+        function recordHealth(type) {
+            healthStatus = type === 'genki' ? '元気！' : (type === 'futsuu' ? 'ふつう' : 'だるい');
+            const badge = document.getElementById('health-status-badge');
+            if (badge) {
+                badge.innerText = healthStatus;
+                badge.className = "text-xs font-bold px-2 py-1 bg-emerald-600 text-white rounded-lg";
+            }
+            speakText(`きょうの体調は「${healthStatus}」ですね。記録しました！`);
+            renderStamps();
+            saveData();
+        }
+
+        function addWaterGlass() {
+            waterCount++;
+            document.getElementById('water-count-display').innerText = waterCount;
+            speakText(`水分補給${waterCount}杯目を記録しました！`);
+            if (waterCount === 5) {
+                if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 80 });
+                speakText("目標の5杯を達成しました！素晴らしい！");
+            }
+            renderAll();
+        }
+
+        // --- 伝言メッセージの更新 ---
+        function updateFamilyMessage() {
+            const msgInput = document.getElementById('input-family-msg');
+            if (!msgInput || !msgInput.value) return;
+            appData.familyMessage = msgInput.value;
+            msgInput.value = '';
+            saveData();
+            renderAll();
+            alert("伝言メッセージを更新しました");
+        }
+
+        // --- タブ切り替え ---
+        function switchElderlyTab(tab) {
+            ['schedule', 'contacts', 'games'].forEach(t => {
+                const content = document.getElementById(`tab-content-${t}`);
+                const btn = document.getElementById(`tab-${t}-btn`);
+                if (content) content.classList.add('hidden');
+                if (btn) btn.classList.add('opacity-60');
+            });
+            
+            const activeContent = document.getElementById(`tab-content-${tab}`);
+            const activeBtn = document.getElementById(`tab-${tab}-btn`);
+            if (activeContent) activeContent.classList.remove('hidden');
+            if (activeBtn) activeBtn.classList.remove('opacity-60');
+        }
+
+        // --- ゲーム選択 ---
+        function selectGame(game) {
+            ['cogni', 'janken', 'numbers'].forEach(g => {
+                const container = document.getElementById(`game-${g}-container`);
+                const btn = document.getElementById(`game-select-${g}`);
+                if (container) container.classList.add('hidden');
+                if (btn) btn.className = "py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400";
+            });
+            
+            const activeContainer = document.getElementById(`game-${game}-container`);
+            const activeBtn = document.getElementById(`game-select-${game}`);
+            if (activeContainer) activeContainer.classList.remove('hidden');
+            if (activeBtn) activeBtn.className = "py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-900 shadow";
+        }
+
+        // 1. 足踏み体操 (コグニサイズ)
+        let cogniTimer = null;
+        let cogniCount = 1;
+        let cogniSpeedMs = 1200;
+
+        function toggleCogniExercise() {
+            const playText = document.getElementById('cogni-play-text');
+            const playIcon = document.getElementById('cogni-play-icon');
+
+            if (cogniTimer) {
+                clearInterval(cogniTimer);
+                cogniTimer = null;
+                if (playText) playText.innerText = "体操スタート";
+                if (playIcon) playIcon.className = "fas fa-play";
+                speakText("体操を一時停止しました");
             } else {
-                actionsDiv.innerHTML = `<button onclick="closeCustomModal()" class="bg-blue-700 text-white font-black px-6 py-3 rounded-2xl text-lg">閉じる</button>`;
+                if (playText) playText.innerText = "一時停止";
+                if (playIcon) playIcon.className = "fas fa-pause";
+                speakText("いち、に、いち、に。足踏みをはじめましょう！");
+
+                cogniTimer = setInterval(() => {
+                    cogniCount++;
+                    if (cogniCount > 30) cogniCount = 1;
+
+                    const countNum = document.getElementById('cogni-count-num');
+                    if (countNum) countNum.innerText = cogniCount;
+
+                    const leftFoot = document.getElementById('step-left-foot');
+                    const rightFoot = document.getElementById('step-right-foot');
+
+                    if (leftFoot && rightFoot) {
+                        if (cogniCount % 2 === 1) {
+                            leftFoot.className = "w-20 h-24 bg-purple-600 text-white rounded-2xl flex flex-col items-center justify-center border-4 border-purple-900 scale-110 shadow-lg transition-all";
+                            rightFoot.className = "w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-all";
+                        } else {
+                            rightFoot.className = "w-20 h-24 bg-purple-600 text-white rounded-2xl flex flex-col items-center justify-center border-4 border-purple-900 scale-110 shadow-lg transition-all";
+                            leftFoot.className = "w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-all";
+                        }
+                    }
+
+                    const hint = document.getElementById('cogni-action-hint');
+                    if (hint) {
+                        if (cogniCount % 3 === 0) {
+                            hint.innerText = "👏 パン！（手拍子）";
+                            hint.className = "text-xl md:text-2xl font-black text-red-600 animate-bounce";
+                        } else {
+                            hint.innerText = "あしぶみ";
+                            hint.className = "text-xl md:text-2xl font-extrabold text-slate-600";
+                        }
+                    }
+                }, cogniSpeedMs);
+            }
+        }
+
+        function changeCogniSpeed() {
+            if (cogniSpeedMs === 1200) {
+                cogniSpeedMs = 800;
+                document.getElementById('cogni-speed-btn').innerText = "はやさ: はやい";
+            } else {
+                cogniSpeedMs = 1200;
+                document.getElementById('cogni-speed-btn').innerText = "はやさ: ふつう";
+            }
+            if (cogniTimer) {
+                toggleCogniExercise();
+                toggleCogniExercise();
+            }
+        }
+
+        // 2. 後出しじゃんけん
+        const jankenHands = ['✊', '✌️', '✋'];
+        let currentJankenOpponent = '✊';
+        let currentJankenRule = 'win';
+
+        function nextJankenRound() {
+            currentJankenOpponent = jankenHands[Math.floor(Math.random() * 3)];
+            currentJankenRule = Math.random() > 0.5 ? 'win' : 'lose';
+
+            const handEl = document.getElementById('janken-opponent-hand');
+            if (handEl) handEl.innerText = currentJankenOpponent;
+            
+            const label = document.getElementById('janken-rule-label');
+            if (label) {
+                if (currentJankenRule === 'win') {
+                    label.innerText = "👈 これに「勝ってください」！";
+                    label.className = "text-xl font-extrabold text-red-600 mb-2";
+                } else {
+                    label.innerText = "👈 これに「負けてください」！";
+                    label.className = "text-xl font-extrabold text-blue-600 mb-2";
+                }
+            }
+            const msgEl = document.getElementById('janken-result-msg');
+            if (msgEl) msgEl.innerText = '';
+        }
+
+        function checkJankenAnswer(userHand) {
+            let isCorrect = false;
+
+            if (currentJankenRule === 'win') {
+                if (
+                    (userHand === '✊' && currentJankenOpponent === '✌️') ||
+                    (userHand === '✌️' && currentJankenOpponent === '✋') ||
+                    (userHand === '✋' && currentJankenOpponent === '✊')
+                ) isCorrect = true;
+            } else {
+                if (
+                    (userHand === '✊' && currentJankenOpponent === '✋') ||
+                    (userHand === '✌️' && currentJankenOpponent === '✊') ||
+                    (userHand === '✋' && currentJankenOpponent === '✌️')
+                ) isCorrect = true;
             }
 
-            document.getElementById('custom-modal-backdrop').classList.remove('hidden');
+            const msg = document.getElementById('janken-result-msg');
+            if (isCorrect) {
+                if (msg) {
+                    msg.innerText = "⭕ 大正解！すばらしい！";
+                    msg.className = "text-2xl font-black text-emerald-600";
+                }
+                speakText("大正解！");
+                if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 50 });
+                incrementExerciseCount();
+                setTimeout(nextJankenRound, 1500);
+            } else {
+                if (msg) {
+                    msg.innerText = "❌ おしい！もう一度！";
+                    msg.className = "text-2xl font-black text-amber-600";
+                }
+                speakText("おしい！もう一度チャレンジ！");
+            }
         }
 
-        function closeCustomModal() {
-            document.getElementById('custom-modal-backdrop').classList.add('hidden');
+        // 3. 数字タッチゲーム
+        let currentTargetNum = 1;
+
+        function initNumbersGame() {
+            currentTargetNum = 1;
+            const targetEl = document.getElementById('target-number');
+            if (targetEl) targetEl.innerText = currentTargetNum;
+            
+            const grid = document.getElementById('numbers-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const numbers = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5);
+
+            numbers.forEach(n => {
+                const btn = document.createElement('button');
+                btn.className = "bg-purple-600 hover:bg-purple-700 text-white font-black text-3xl py-5 rounded-2xl border-4 border-purple-900 shadow-lg active:scale-95";
+                btn.innerText = n;
+                btn.onclick = () => handleNumberClick(n, btn);
+                grid.appendChild(btn);
+            });
         }
 
-        function alertModal(msg) {
-            showCustomModal('確認', msg);
+        function handleNumberClick(n, btnElement) {
+            if (n === currentTargetNum) {
+                btnElement.className = "bg-slate-300 text-slate-400 font-black text-3xl py-5 rounded-2xl border-4 border-slate-400 cursor-not-allowed";
+                btnElement.disabled = true;
+                currentTargetNum++;
+
+                if (currentTargetNum > 6) {
+                    speakText("パーフェクト！数字タッチ完了です！");
+                    if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 70 });
+                    incrementExerciseCount();
+                    setTimeout(initNumbersGame, 2000);
+                } else {
+                    const targetEl = document.getElementById('target-number');
+                    if (targetEl) targetEl.innerText = currentTargetNum;
+                }
+            } else {
+                speakText(`ちがいます。${currentTargetNum}を押してください`);
+            }
         }
 
-        /* -------------------------------------------------------------
-           初期化
-        ------------------------------------------------------------- */
-        window.onload = function() {
-            updateClock();
-            setInterval(updateClock, 1000);
+        function incrementExerciseCount() {
+            exerciseDoneCount++;
+            const countEl = document.getElementById('exercise-done-count');
+            if (countEl) countEl.innerText = exerciseDoneCount;
+        }
 
-            renderPhotoSlideshow();
-            startPhotoTimer();
+        // --- モード切替 ---
+        function openModeSwitchModal() {
+            if (isCaregiverMode) {
+                switchToElderlyMode();
+                return;
+            }
+            const a = Math.floor(Math.random() * 5) + 3;
+            const b = Math.floor(Math.random() * 5) + 2;
+            authAnswerValue = a + b;
+            document.getElementById('auth-question').innerText = `${a} + ${b} = ?`;
+            document.getElementById('auth-answer').value = '';
+            document.getElementById('mode-modal').classList.remove('hidden');
+        }
 
-            renderStamps();
-            renderSchedule();
-            renderContacts();
+        function closeModeSwitchModal() {
+            document.getElementById('mode-modal').classList.add('hidden');
+        }
 
-            // 初期あいさつ
-            setTimeout(() => {
-                speakText('あんしん生活サポートを起動しました。今日も元気に過ごしましょう');
-            }, 800);
-        };
+        function verifyModeSwitch() {
+            const ans = parseInt(document.getElementById('auth-answer').value);
+            if (ans === authAnswerValue) {
+                closeModeSwitchModal();
+                switchToCaregiverMode();
+            } else {
+                alert("計算の答えが違います。");
+            }
+        }
+
+        function switchToCaregiverMode() {
+            isCaregiverMode = true;
+            document.getElementById('elderly-view').classList.add('hidden');
+            document.getElementById('caregiver-view').classList.remove('hidden');
+            document.getElementById('current-mode-label').innerText = "本人画面へ";
+            renderAll();
+        }
+
+        function switchToElderlyMode() {
+            isCaregiverMode = false;
+            document.getElementById('caregiver-view').classList.add('hidden');
+            document.getElementById('elderly-view').classList.remove('hidden');
+            document.getElementById('current-mode-label').innerText = "家族モードへ";
+            renderAll();
+        }
     </script>
 </body>
 </html>
