@@ -32,10 +32,11 @@
             transition: background-color 0.5s ease;
         }
 
-        body.time-morning { background-color: #fefce8; }
-        body.time-afternoon { background-color: #f0fdf4; }
-        body.time-evening { background-color: #fff7ed; }
-        body.time-night { background-color: #0f172a; color: #f8fafc; }
+        /* 時間帯別の背景カラー */
+        body.time-morning { background-color: #fefce8; }   /* あさ */
+        body.time-afternoon { background-color: #f0fdf4; } /* ひる */
+        body.time-evening { background-color: #fff7ed; }   /* ゆうがた */
+        body.time-night { background-color: #0f172a; color: #f8fafc; } /* よる・まよなか */
         
         .big-btn {
             min-height: 80px;
@@ -63,6 +64,7 @@
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             
             <div id="header-datetime" class="flex items-center space-x-3">
+                <!-- 時間帯バッジ表示 -->
                 <div id="time-period-badge" class="bg-yellow-400 text-blue-950 px-3 py-2 rounded-2xl font-black flex flex-col items-center justify-center border-2 border-yellow-200 shadow">
                     <span id="time-period-icon" class="text-2xl md:text-3xl">🌅</span>
                     <span id="time-period-text" class="text-sm md:text-base tracking-wider font-extrabold">あさ</span>
@@ -423,7 +425,7 @@
                 { name: "長男（太郎）", phone: "090-8765-4321", icon: "👨", role: "長男" },
                 { name: "ケアマネジャー", phone: "03-0000-0000", icon: "🏥", role: "担当者" }
             ],
-            gallery: [] // サンプル写真を削除（空の配列）
+            gallery: [] // 写真は初期状態で全削除（空）
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -449,11 +451,69 @@
             }
         }
 
+        /* 指定の時間帯ルールに基づく時計＆時間帯表示ロジック */
         function updateClock() {
             const now = new Date();
             const days = ['日', '月', '火', '水', '木', '金', '土'];
-            document.getElementById('date-display').innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日(${days[now.getDay()]})`;
-            document.getElementById('time-display').innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            
+            const dateEl = document.getElementById('date-display');
+            const timeEl = document.getElementById('time-display');
+            if (dateEl) dateEl.innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日(${days[now.getDay()]})`;
+            if (timeEl) timeEl.innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const timeValue = h * 100 + m; // 例: 11時1分 -> 1101
+
+            const body = document.getElementById('app-body');
+            const icon = document.getElementById('time-period-icon');
+            const text = document.getElementById('time-period-text');
+            const recText = document.getElementById('recommend-text');
+            const recIcon = document.getElementById('recommend-icon-bg');
+
+            if (body) body.className = "min-h-screen flex flex-col justify-between selection:bg-yellow-200 ";
+
+            // 時間帯の精密判定
+            // あさ: 5:00 ～ 11:00
+            if (timeValue >= 500 && timeValue <= 1100) {
+                if (body) body.classList.add('time-morning');
+                if (icon) icon.innerText = "🌅";
+                if (text) text.innerText = "あさ";
+                if (recIcon) recIcon.innerText = "💊";
+                if (recText) recText.innerText = "あさのお薬と朝食の時間ですよ";
+            } 
+            // ひる: 11:01 ～ 15:00
+            else if (timeValue >= 1101 && timeValue <= 1500) {
+                if (body) body.classList.add('time-afternoon');
+                if (icon) icon.innerText = "☀️";
+                if (text) text.innerText = "ひる";
+                if (recIcon) recIcon.innerText = "🍱";
+                if (recText) recText.innerText = "お昼ご飯と水分補給の時間です";
+            } 
+            // ゆうがた: 15:01 ～ 18:00
+            else if (timeValue >= 1501 && timeValue <= 1800) {
+                if (body) body.classList.add('time-evening');
+                if (icon) icon.innerText = "🌆";
+                if (text) text.innerText = "ゆうがた";
+                if (recIcon) recIcon.innerText = "🦶";
+                if (recText) recText.innerText = "少し体を動かして脳トレをしましょう";
+            } 
+            // よる: 18:01 ～ 24:00 (23:59)
+            else if (timeValue >= 1801 && timeValue <= 2359) {
+                if (body) body.classList.add('time-night');
+                if (icon) icon.innerText = "🌙";
+                if (text) text.innerText = "よる";
+                if (recIcon) recIcon.innerText = "🌙";
+                if (recText) recText.innerText = "夜のお薬をのんでゆっくり過ごしましょう";
+            } 
+            // まよなか: 24:01 (0:01) ～ 4:59
+            else {
+                if (body) body.classList.add('time-night');
+                if (icon) icon.innerText = "🌌";
+                if (text) text.innerText = "まよなか";
+                if (recIcon) recIcon.innerText = "🛌";
+                if (recText) recText.innerText = "夜深いです。無理せず休んでくださいね";
+            }
         }
 
         function renderAll() {
@@ -595,7 +655,6 @@
             
             if (caregiverGalleryList) caregiverGalleryList.innerHTML = '';
 
-            // 家族モード用の写真管理リスト描画
             if (caregiverGalleryList) {
                 if (!appData.gallery || appData.gallery.length === 0) {
                     caregiverGalleryList.innerHTML = `<span class="text-slate-400 font-bold col-span-2">写真が登録されていません</span>`;
@@ -615,7 +674,6 @@
                 }
             }
 
-            // 本人モード用のフォトスライドショー描画
             if (!container) return;
 
             if (!appData.gallery || appData.gallery.length === 0) {
