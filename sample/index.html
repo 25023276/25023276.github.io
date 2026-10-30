@@ -153,18 +153,15 @@
                 <div id="stamp-grid" class="flex items-center justify-around pt-2"></div>
             </div>
 
-            <!-- 伝言 -->
-            <div id="family-message-card" class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-4 md:p-5 shadow-md flex items-center space-x-4">
-                <div class="bg-yellow-500 text-white p-3 md:p-4 rounded-full flex-shrink-0">
-                    <i class="fas fa-comment-dots text-3xl md:text-4xl"></i>
+            <!-- 伝言（複数対応エリア） -->
+            <div class="space-y-3">
+                <div class="flex items-center space-x-2 px-1">
+                    <i class="fas fa-comment-dots text-yellow-600 text-2xl"></i>
+                    <h3 class="text-xl font-black text-slate-800">ご家族からの伝言一覧</h3>
                 </div>
-                <div class="flex-grow">
-                    <div class="text-sm md:text-base font-bold text-yellow-900">ご家族からの伝言</div>
-                    <div id="family-message-text" class="text-lg md:text-2xl font-black text-slate-900 mt-1">「きょうも元気にご飯をたべて、お散歩にいこうね！」</div>
+                <div id="family-message-container" class="space-y-3">
+                    <!-- JSで動的レンダリング -->
                 </div>
-                <button onclick="speakText(document.getElementById('family-message-text').innerText)" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 p-3 rounded-2xl font-bold text-sm">
-                    <i class="fas fa-volume-up text-2xl"></i>
-                </button>
             </div>
 
             <!-- 体調＆水分 -->
@@ -361,18 +358,21 @@
                 </div>
             </div>
 
-            <!-- 登録済み写真管理（削除機能） -->
+            <!-- 登録済み写真管理 -->
             <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
                 <h3 class="text-xl font-bold border-b pb-2">🖼️ 登録済み写真の管理・削除</h3>
                 <div id="caregiver-gallery-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </div>
 
-            <!-- 伝言変更 -->
+            <!-- 伝言追加＆管理 -->
             <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
-                <h3 class="text-xl font-bold border-b pb-2">💬 伝言の変更</h3>
+                <h3 class="text-xl font-bold border-b pb-2">💬 家族からの伝言（追加・管理）</h3>
                 <div class="flex space-x-2">
                     <input type="text" id="input-family-msg" placeholder="新しい伝言を入力" class="flex-grow p-3 border rounded-xl font-bold">
-                    <button onclick="updateFamilyMessage()" class="bg-yellow-500 text-yellow-950 font-bold px-5 py-3 rounded-xl shadow">更新</button>
+                    <button onclick="addFamilyMessage()" class="bg-yellow-500 text-yellow-950 font-bold px-5 py-3 rounded-xl shadow">追加</button>
+                </div>
+                <div id="caregiver-message-list" class="space-y-2 pt-2">
+                    <!-- JSで動的生成 -->
                 </div>
             </div>
 
@@ -413,7 +413,9 @@
         let galleryBase64Temp = '';
 
         let appData = {
-            familyMessage: "きょうも元気にご飯をたべて、お散歩にいこうね！",
+            messages: [
+                { id: 1, text: "きょうも元気にご飯をたべて、お散歩にいこうね！" }
+            ],
             schedules: [
                 { id: 1, category: "薬", time: "08:00", title: "あさの食後薬をのむ", done: false },
                 { id: 2, category: "体操", time: "10:30", title: "すわって足踏み運動", done: false },
@@ -425,7 +427,7 @@
                 { name: "長男（太郎）", phone: "090-8765-4321", icon: "👨", role: "長男" },
                 { name: "ケアマネジャー", phone: "03-0000-0000", icon: "🏥", role: "担当者" }
             ],
-            gallery: [] // 写真は初期状態で全削除（空）
+            gallery: []
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -446,12 +448,15 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
+                    // 単一の文字列から配列データへの移行互換性対応
+                    if (parsed.familyMessage && !parsed.messages) {
+                        parsed.messages = [{ id: Date.now(), text: parsed.familyMessage }];
+                    }
                     appData = { ...appData, ...parsed };
                 } catch(e) {}
             }
         }
 
-        /* 指定の時間帯ルールに基づく時計＆時間帯表示ロジック */
         function updateClock() {
             const now = new Date();
             const days = ['日', '月', '火', '水', '木', '金', '土'];
@@ -463,7 +468,7 @@
 
             const h = now.getHours();
             const m = now.getMinutes();
-            const timeValue = h * 100 + m; // 例: 11時1分 -> 1101
+            const timeValue = h * 100 + m;
 
             const body = document.getElementById('app-body');
             const icon = document.getElementById('time-period-icon');
@@ -473,41 +478,31 @@
 
             if (body) body.className = "min-h-screen flex flex-col justify-between selection:bg-yellow-200 ";
 
-            // 時間帯の精密判定
-            // あさ: 5:00 ～ 11:00
             if (timeValue >= 500 && timeValue <= 1100) {
                 if (body) body.classList.add('time-morning');
                 if (icon) icon.innerText = "🌅";
                 if (text) text.innerText = "あさ";
                 if (recIcon) recIcon.innerText = "💊";
                 if (recText) recText.innerText = "あさのお薬と朝食の時間ですよ";
-            } 
-            // ひる: 11:01 ～ 15:00
-            else if (timeValue >= 1101 && timeValue <= 1500) {
+            } else if (timeValue >= 1101 && timeValue <= 1500) {
                 if (body) body.classList.add('time-afternoon');
                 if (icon) icon.innerText = "☀️";
                 if (text) text.innerText = "ひる";
                 if (recIcon) recIcon.innerText = "🍱";
                 if (recText) recText.innerText = "お昼ご飯と水分補給の時間です";
-            } 
-            // ゆうがた: 15:01 ～ 18:00
-            else if (timeValue >= 1501 && timeValue <= 1800) {
+            } else if (timeValue >= 1501 && timeValue <= 1800) {
                 if (body) body.classList.add('time-evening');
                 if (icon) icon.innerText = "🌆";
                 if (text) text.innerText = "ゆうがた";
                 if (recIcon) recIcon.innerText = "🦶";
                 if (recText) recText.innerText = "少し体を動かして脳トレをしましょう";
-            } 
-            // よる: 18:01 ～ 24:00 (23:59)
-            else if (timeValue >= 1801 && timeValue <= 2359) {
+            } else if (timeValue >= 1801 && timeValue <= 2359) {
                 if (body) body.classList.add('time-night');
                 if (icon) icon.innerText = "🌙";
                 if (text) text.innerText = "よる";
                 if (recIcon) recIcon.innerText = "🌙";
                 if (recText) recText.innerText = "夜のお薬をのんでゆっくり過ごしましょう";
-            } 
-            // まよなか: 24:01 (0:01) ～ 4:59
-            else {
+            } else {
                 if (body) body.classList.add('time-night');
                 if (icon) icon.innerText = "🌌";
                 if (text) text.innerText = "まよなか";
@@ -521,8 +516,7 @@
             renderContacts();
             renderGallery();
             renderStamps();
-            const msgEl = document.getElementById('family-message-text');
-            if (msgEl) msgEl.innerText = `「${appData.familyMessage}」`;
+            renderMessages();
         }
 
         function toggleSpeech() {
@@ -539,6 +533,87 @@
             uttr.lang = 'ja-JP';
             uttr.rate = 0.9;
             window.speechSynthesis.speak(uttr);
+        }
+
+        /* 伝言（複数対応）のレンダリング */
+        function renderMessages() {
+            const container = document.getElementById('family-message-container');
+            const caregiverMsgList = document.getElementById('caregiver-message-list');
+
+            if (container) container.innerHTML = '';
+            if (caregiverMsgList) caregiverMsgList.innerHTML = '';
+
+            if (!appData.messages || appData.messages.length === 0) {
+                if (container) {
+                    container.innerHTML = `
+                        <div class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-4 text-center font-bold text-yellow-900">
+                            伝言はまだありません
+                        </div>
+                    `;
+                }
+                if (caregiverMsgList) {
+                    caregiverMsgList.innerHTML = `<span class="text-slate-400 font-bold">登録された伝言はありません</span>`;
+                }
+                return;
+            }
+
+            // 本人モード（カード形式で複数表示）
+            if (container) {
+                appData.messages.forEach(msg => {
+                    const card = document.createElement('div');
+                    card.className = "bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-4 md:p-5 shadow-md flex items-center space-x-4";
+                    card.innerHTML = `
+                        <div class="bg-yellow-500 text-white p-3 md:p-4 rounded-full flex-shrink-0">
+                            <i class="fas fa-comment-dots text-2xl md:text-3xl"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="text-sm font-bold text-yellow-900">ご家族からの伝言</div>
+                            <div class="text-lg md:text-xl font-black text-slate-900 mt-1">「${msg.text}」</div>
+                        </div>
+                        <button onclick="speakText('${msg.text}')" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 p-3 rounded-2xl font-bold text-sm flex-shrink-0">
+                            <i class="fas fa-volume-up text-2xl"></i>
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            // 家族モード（削除ボタン付きリスト）
+            if (caregiverMsgList) {
+                appData.messages.forEach(msg => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border";
+                    item.innerHTML = `
+                        <span class="truncate mr-2">「${msg.text}」</span>
+                        <button onclick="deleteFamilyMessage(${msg.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg flex-shrink-0">削除</button>
+                    `;
+                    caregiverMsgList.appendChild(item);
+                });
+            }
+        }
+
+        function addFamilyMessage() {
+            const input = document.getElementById('input-family-msg');
+            if (!input || !input.value.trim()) return;
+
+            if (!appData.messages) appData.messages = [];
+            appData.messages.unshift({
+                id: Date.now(),
+                text: input.value.trim()
+            });
+
+            input.value = '';
+            saveData();
+            renderMessages();
+            alert("伝言を追加しました");
+        }
+
+        function deleteFamilyMessage(id) {
+            if (confirm("この伝言を削除しますか？")) {
+                appData.messages = appData.messages.filter(m => m.id !== id);
+                saveData();
+                renderMessages();
+            }
         }
 
         function renderSchedule() {
@@ -787,16 +862,6 @@
             speakText(`水分補給${waterCount}杯目！`);
             if (waterCount === 5 && typeof confetti === 'function') confetti({ particleCount: 70, spread: 80 });
             renderAll();
-        }
-
-        function updateFamilyMessage() {
-            const msgInput = document.getElementById('input-family-msg');
-            if (!msgInput || !msgInput.value) return;
-            appData.familyMessage = msgInput.value;
-            msgInput.value = '';
-            saveData();
-            renderAll();
-            alert("伝言メッセージを更新しました");
         }
 
         function switchElderlyTab(tab) {
