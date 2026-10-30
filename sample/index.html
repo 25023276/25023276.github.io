@@ -19,13 +19,6 @@
                 extend: {
                     fontFamily: {
                         sans: ['Noto Sans JP', 'sans-serif'],
-                    },
-                    colors: {
-                        'elderly-bg': '#FFFBEB',
-                        'elderly-card': '#FFFFFF',
-                        'elderly-primary': '#1E40AF',
-                        'elderly-success': '#15803D',
-                        'elderly-warning': '#C2410C',
                     }
                 }
             }
@@ -39,7 +32,6 @@
             transition: background-color 0.5s ease;
         }
 
-        /* 時間帯による背景モード */
         body.time-morning { background-color: #fefce8; }
         body.time-afternoon { background-color: #f0fdf4; }
         body.time-evening { background-color: #fff7ed; }
@@ -88,6 +80,7 @@
                     <span id="tts-status">よみあげ: オン</span>
                 </button>
 
+                <!-- モード切替ボタン -->
                 <button onclick="openModeSwitchModal()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-2xl font-bold text-xs md:text-sm border-2 border-slate-500 flex flex-col items-center justify-center">
                     <i class="fas fa-user-cog text-base md:text-lg"></i>
                     <span id="current-mode-label">家族モードへ</span>
@@ -384,18 +377,18 @@
 
     </main>
 
-    <!-- モード切り替えモーダル -->
+    <!-- モード切り替え認証用ポップアップ -->
     <div id="mode-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border-4 border-slate-700 text-slate-900">
             <h3 class="text-2xl font-black flex items-center">🔒 介護者モードへの切替</h3>
-            <p class="text-sm font-bold text-slate-600">簡単な計算に答えてください。</p>
+            <p class="text-sm font-bold text-slate-600">誤操作を防ぐため、簡単な計算に答えてください。</p>
             <div class="bg-slate-100 p-4 rounded-2xl text-center">
                 <span id="auth-question" class="text-2xl font-black">5 + 3 = ?</span>
             </div>
             <input type="number" id="auth-answer" placeholder="答えを入力" class="w-full p-3 border rounded-xl text-center text-2xl font-black">
             <div class="flex space-x-2">
                 <button onclick="closeModeSwitchModal()" class="w-1/2 bg-slate-200 font-bold py-3 rounded-xl">キャンセル</button>
-                <button onclick="verifyModeSwitch()" class="w-1/2 bg-blue-700 text-white font-bold py-3 rounded-xl shadow">切替</button>
+                <button onclick="verifyModeSwitch()" class="w-1/2 bg-blue-700 text-white font-bold py-3 rounded-xl shadow text-white">切替</button>
             </div>
         </div>
     </div>
@@ -404,7 +397,7 @@
     <script>
         let speechEnabled = true;
         let isCaregiverMode = false;
-        let authAnswerValue = 0;
+        let authAnswerValue = 8;
         let waterCount = 0;
         let healthStatus = '';
         let exerciseDoneCount = 0;
@@ -793,23 +786,31 @@
             }
         }
 
+        /* --- モード切り替え処理（修正・安定化） --- */
         function openModeSwitchModal() {
             if (isCaregiverMode) {
                 switchToElderlyMode();
                 return;
             }
             authAnswerValue = 8;
-            document.getElementById('auth-question').innerText = "5 + 3 = ?";
-            document.getElementById('auth-answer').value = '';
-            document.getElementById('mode-modal').classList.remove('hidden');
+            const qEl = document.getElementById('auth-question');
+            const aEl = document.getElementById('auth-answer');
+            const modalEl = document.getElementById('mode-modal');
+            
+            if (qEl) qEl.innerText = "5 + 3 = ?";
+            if (aEl) aEl.value = '';
+            if (modalEl) modalEl.classList.remove('hidden');
         }
 
         function closeModeSwitchModal() {
-            document.getElementById('mode-modal').classList.add('hidden');
+            const modalEl = document.getElementById('mode-modal');
+            if (modalEl) modalEl.classList.add('hidden');
         }
 
         function verifyModeSwitch() {
-            const ans = parseInt(document.getElementById('auth-answer').value);
+            const aEl = document.getElementById('auth-answer');
+            if (!aEl) return;
+            const ans = parseInt(aEl.value);
             if (ans === authAnswerValue) {
                 closeModeSwitchModal();
                 switchToCaregiverMode();
