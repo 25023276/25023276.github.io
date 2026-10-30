@@ -142,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- スタンプ帳（予定数＋αに合わせて動的生成） -->
+            <!-- スタンプ帳（予定の追加・削除に完全連動） -->
             <div class="bg-gradient-to-r from-amber-100 to-yellow-200 border-4 border-amber-500 rounded-3xl p-4 shadow-md text-slate-900 space-y-2">
                 <div class="flex justify-between items-center border-b-2 border-amber-300 pb-2">
                     <span class="text-xl md:text-2xl font-black text-amber-950 flex items-center">
@@ -153,15 +153,13 @@
                 <div id="stamp-grid" class="flex flex-wrap items-center justify-start gap-3 pt-2"></div>
             </div>
 
-            <!-- 伝言（複数対応エリア） -->
+            <!-- 伝言 -->
             <div class="space-y-3">
                 <div class="flex items-center space-x-2 px-1">
                     <i class="fas fa-comment-dots text-yellow-600 text-2xl"></i>
                     <h3 class="text-xl font-black text-slate-800">ご家族からの伝言一覧</h3>
                 </div>
-                <div id="family-message-container" class="space-y-3">
-                    <!-- JSで動的レンダリング -->
-                </div>
+                <div id="family-message-container" class="space-y-3"></div>
             </div>
 
             <!-- 体調＆水分 -->
@@ -251,7 +249,6 @@
                             <i class="fas fa-running text-purple-700 mr-3"></i>認知症よぼう 体操＆脳トレ
                         </h2>
                     </div>
-                    <!-- 本日の達成回数（動的計算） -->
                     <div class="bg-purple-900 text-white font-black px-3 py-2 rounded-xl text-sm md:text-base">
                         本日 <span id="exercise-done-count" class="text-yellow-300 text-xl">0</span> / <span id="exercise-total-target" class="text-xl">3</span> 回達成
                     </div>
@@ -278,7 +275,7 @@
                             <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="cogni-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="cogni-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
                         <div class="bg-amber-100 p-3 rounded-2xl border border-amber-300 font-bold text-base">
-                            💡 イスに座って足踏みをしながら「3の倍数」で手をたたきましょう！<br>（1回完了で1セット達成）
+                            💡 イスに座って足踏みをしながら「3の倍数」で手をたたきましょう！
                         </div>
                         <div class="flex items-center justify-center space-x-6 my-4">
                             <div id="step-left-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700">
@@ -482,16 +479,8 @@
         let galleryBase64Temp = '';
 
         let appData = {
-            exerciseTargets: {
-                cogni: 1,
-                janken: 1,
-                numbers: 1
-            },
-            exerciseDone: {
-                cogni: 0,
-                janken: 0,
-                numbers: 0
-            },
+            exerciseTargets: { cogni: 1, janken: 1, numbers: 1 },
+            exerciseDone: { cogni: 0, janken: 0, numbers: 0 },
             messages: [
                 { id: 1, text: "きょうも元気にご飯をたべて、お散歩にいこうね！" }
             ],
@@ -531,6 +520,7 @@
                     if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, janken: 1, numbers: 1 };
                     if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, janken: 0, numbers: 0 };
                     if (!appData.contacts) appData.contacts = [];
+                    if (!appData.schedules) appData.schedules = [];
                 } catch(e) {}
             }
         }
@@ -614,23 +604,23 @@
             window.speechSynthesis.speak(uttr);
         }
 
-        /* スタンプ帳（予定件数＋体調1枠＋水分1枠に合わせて動的に生成） */
+        /* スタンプ帳（登録された予定の件数＋体調1枠＋水分1枠に完全に動的適合） */
         function renderStamps() {
             const grid = document.getElementById('stamp-grid');
             if (!grid) return;
             grid.innerHTML = '';
 
-            // 1. 完了した予定の数
+            // 1. 完了した予定の件数
             const completedSchedulesCount = appData.schedules.filter(s => s.done).length;
-            // 2. 体調を記録したか (1枠)
+            // 2. 体調入力達成 (1枠)
             const healthDone = healthStatus ? 1 : 0;
-            // 3. 水分目標(5杯)を達成したか (1枠)
+            // 3. 水分目標(5杯)達成 (1枠)
             const waterDone = waterCount >= 5 ? 1 : 0;
 
-            // 獲得済みスタンプの合計数
+            // 獲得済みスタンプ数
             const totalEarnedStamps = completedSchedulesCount + healthDone + waterDone;
 
-            // 総スタンプ枠数 = (登録済み予定数) + (体調記録1枠) + (水分達成1枠)
+            // スタンプの総枠数 ＝ 登録予定数 ＋ 体調(1枠) ＋ 水分(1枠)
             const totalStampSlots = appData.schedules.length + 2;
 
             document.getElementById('stamp-count-text').innerText = `${totalEarnedStamps} / ${totalStampSlots} 個ゲット！`;
@@ -644,6 +634,89 @@
                 slot.innerText = '💮';
                 grid.appendChild(slot);
             }
+        }
+
+        function renderSchedule() {
+            const container = document.getElementById('elderly-schedule-list');
+            const caregiverContainer = document.getElementById('caregiver-schedule-list');
+            if (container) container.innerHTML = '';
+            if (caregiverContainer) caregiverContainer.innerHTML = '';
+
+            let completedCount = 0;
+
+            appData.schedules.forEach((item) => {
+                if (item.done) completedCount++;
+
+                if (container) {
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-3xl border-4 flex items-center justify-between shadow-md ${
+                        item.done ? 'bg-slate-100 border-slate-300 opacity-60' : 'bg-white border-blue-500'
+                    }`;
+                    card.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <div class="text-2xl font-black bg-blue-100 text-blue-900 px-3 py-2 rounded-2xl border border-blue-300">${item.time}</div>
+                            <div>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900">${item.category}</span>
+                                <div class="text-xl md:text-2xl font-black ${item.done ? 'line-through text-slate-500' : 'text-slate-900'}">${item.title}</div>
+                            </div>
+                        </div>
+                        <button onclick="toggleScheduleDone(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow ${
+                            item.done ? 'bg-slate-300 text-slate-700' : 'bg-emerald-600 text-white'
+                        }">できた！</button>
+                    `;
+                    container.appendChild(card);
+                }
+
+                if (caregiverContainer) {
+                    const cCard = document.createElement('div');
+                    cCard.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border";
+                    cCard.innerHTML = `
+                        <span>[${item.time}] (${item.category}) ${item.title}</span>
+                        <button onclick="deleteSchedule(${item.id})" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
+                    `;
+                    caregiverContainer.appendChild(cCard);
+                }
+            });
+
+            const progressEl = document.getElementById('schedule-progress-text');
+            if (progressEl) progressEl.innerText = `${completedCount} / ${appData.schedules.length} 完了`;
+            
+            // 予定数に連動してスタンプ帳を再描写
+            renderStamps();
+        }
+
+        function toggleScheduleDone(id) {
+            const item = appData.schedules.find(s => s.id === id);
+            if (item) {
+                item.done = !item.done;
+                if (item.done) {
+                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+                    speakText(`${item.title}、よくできました！`);
+                }
+                saveData();
+                renderSchedule();
+            }
+        }
+
+        function handleAddSchedule(e) {
+            e.preventDefault();
+            const cat = document.getElementById('input-category').value;
+            const time = document.getElementById('input-time').value;
+            const title = document.getElementById('input-title').value;
+
+            appData.schedules.push({ id: Date.now(), category: cat, time: time, title: title, done: false });
+            appData.schedules.sort((a, b) => a.time.localeCompare(b.time));
+
+            document.getElementById('input-title').value = '';
+            saveData();
+            renderSchedule();
+            alert("予定を追加しました");
+        }
+
+        function deleteSchedule(id) {
+            appData.schedules = appData.schedules.filter(s => s.id !== id);
+            saveData();
+            renderSchedule();
         }
 
         /* 連絡先のレンダリング＆追加・削除 */
@@ -851,87 +924,6 @@
                 saveData();
                 renderMessages();
             }
-        }
-
-        function renderSchedule() {
-            const container = document.getElementById('elderly-schedule-list');
-            const caregiverContainer = document.getElementById('caregiver-schedule-list');
-            if (container) container.innerHTML = '';
-            if (caregiverContainer) caregiverContainer.innerHTML = '';
-
-            let completedCount = 0;
-
-            appData.schedules.forEach((item) => {
-                if (item.done) completedCount++;
-
-                if (container) {
-                    const card = document.createElement('div');
-                    card.className = `p-4 rounded-3xl border-4 flex items-center justify-between shadow-md ${
-                        item.done ? 'bg-slate-100 border-slate-300 opacity-60' : 'bg-white border-blue-500'
-                    }`;
-                    card.innerHTML = `
-                        <div class="flex items-center space-x-4">
-                            <div class="text-2xl font-black bg-blue-100 text-blue-900 px-3 py-2 rounded-2xl border border-blue-300">${item.time}</div>
-                            <div>
-                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900">${item.category}</span>
-                                <div class="text-xl md:text-2xl font-black ${item.done ? 'line-through text-slate-500' : 'text-slate-900'}">${item.title}</div>
-                            </div>
-                        </div>
-                        <button onclick="toggleScheduleDone(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow ${
-                            item.done ? 'bg-slate-300 text-slate-700' : 'bg-emerald-600 text-white'
-                        }">できた！</button>
-                    `;
-                    container.appendChild(card);
-                }
-
-                if (caregiverContainer) {
-                    const cCard = document.createElement('div');
-                    cCard.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border";
-                    cCard.innerHTML = `
-                        <span>[${item.time}] (${item.category}) ${item.title}</span>
-                        <button onclick="deleteSchedule(${item.id})" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
-                    `;
-                    caregiverContainer.appendChild(cCard);
-                }
-            });
-
-            const progressEl = document.getElementById('schedule-progress-text');
-            if (progressEl) progressEl.innerText = `${completedCount} / ${appData.schedules.length} 完了`;
-            renderStamps();
-        }
-
-        function toggleScheduleDone(id) {
-            const item = appData.schedules.find(s => s.id === id);
-            if (item) {
-                item.done = !item.done;
-                if (item.done) {
-                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
-                    speakText(`${item.title}、よくできました！`);
-                }
-                saveData();
-                renderSchedule();
-            }
-        }
-
-        function handleAddSchedule(e) {
-            e.preventDefault();
-            const cat = document.getElementById('input-category').value;
-            const time = document.getElementById('input-time').value;
-            const title = document.getElementById('input-title').value;
-
-            appData.schedules.push({ id: Date.now(), category: cat, time: time, title: title, done: false });
-            appData.schedules.sort((a, b) => a.time.localeCompare(b.time));
-
-            document.getElementById('input-title').value = '';
-            saveData();
-            renderSchedule();
-            alert("予定を追加しました");
-        }
-
-        function deleteSchedule(id) {
-            appData.schedules = appData.schedules.filter(s => s.id !== id);
-            saveData();
-            renderSchedule();
         }
 
         function renderGallery() {
