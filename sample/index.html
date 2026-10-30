@@ -142,15 +142,15 @@
                 </div>
             </div>
 
-            <!-- スタンプ帳 -->
+            <!-- スタンプ帳（予定数＋αに合わせて動的生成） -->
             <div class="bg-gradient-to-r from-amber-100 to-yellow-200 border-4 border-amber-500 rounded-3xl p-4 shadow-md text-slate-900 space-y-2">
                 <div class="flex justify-between items-center border-b-2 border-amber-300 pb-2">
                     <span class="text-xl md:text-2xl font-black text-amber-950 flex items-center">
                         <i class="fas fa-star text-yellow-500 mr-2 text-3xl"></i>きょうの「できた！」スタンプ帳
                     </span>
-                    <span id="stamp-count-text" class="bg-amber-800 text-white font-black px-3 py-1 rounded-xl text-sm md:text-base">0 個ゲット！</span>
+                    <span id="stamp-count-text" class="bg-amber-800 text-white font-black px-3 py-1 rounded-xl text-sm md:text-base">0 / 0 個ゲット！</span>
                 </div>
-                <div id="stamp-grid" class="flex items-center justify-around pt-2"></div>
+                <div id="stamp-grid" class="flex flex-wrap items-center justify-start gap-3 pt-2"></div>
             </div>
 
             <!-- 伝言（複数対応エリア） -->
@@ -614,6 +614,38 @@
             window.speechSynthesis.speak(uttr);
         }
 
+        /* スタンプ帳（予定件数＋体調1枠＋水分1枠に合わせて動的に生成） */
+        function renderStamps() {
+            const grid = document.getElementById('stamp-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            // 1. 完了した予定の数
+            const completedSchedulesCount = appData.schedules.filter(s => s.done).length;
+            // 2. 体調を記録したか (1枠)
+            const healthDone = healthStatus ? 1 : 0;
+            // 3. 水分目標(5杯)を達成したか (1枠)
+            const waterDone = waterCount >= 5 ? 1 : 0;
+
+            // 獲得済みスタンプの合計数
+            const totalEarnedStamps = completedSchedulesCount + healthDone + waterDone;
+
+            // 総スタンプ枠数 = (登録済み予定数) + (体調記録1枠) + (水分達成1枠)
+            const totalStampSlots = appData.schedules.length + 2;
+
+            document.getElementById('stamp-count-text').innerText = `${totalEarnedStamps} / ${totalStampSlots} 個ゲット！`;
+
+            for (let i = 0; i < totalStampSlots; i++) {
+                const isStamped = i < totalEarnedStamps;
+                const slot = document.createElement('div');
+                slot.className = `w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-2xl md:text-3xl border-4 ${
+                    isStamped ? 'bg-yellow-400 border-amber-600 text-amber-950 animate-stamp shadow-lg' : 'bg-white/50 border-amber-300/60 text-amber-200'
+                }`;
+                slot.innerText = '💮';
+                grid.appendChild(slot);
+            }
+        }
+
         /* 連絡先のレンダリング＆追加・削除 */
         function renderContacts() {
             const container = document.getElementById('elderly-contacts-list');
@@ -628,7 +660,6 @@
                 return;
             }
 
-            // 本人モード一覧
             if (container) {
                 appData.contacts.forEach(contact => {
                     const card = document.createElement('div');
@@ -648,7 +679,6 @@
                 });
             }
 
-            // 家族モード一覧
             if (caregiverList) {
                 appData.contacts.forEach(contact => {
                     const item = document.createElement('div');
@@ -1001,29 +1031,6 @@
                 galleryPhotoIndex = 0;
                 saveData();
                 renderGallery();
-            }
-        }
-
-        function renderStamps() {
-            const grid = document.getElementById('stamp-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-
-            let count = appData.schedules.filter(s => s.done).length;
-            if (waterCount >= 5) count++;
-            if (healthStatus) count++;
-
-            const totalStamps = Math.min(count, 5);
-            document.getElementById('stamp-count-text').innerText = `${totalStamps} 個ゲット！`;
-
-            for (let i = 0; i < 5; i++) {
-                const isStamped = i < totalStamps;
-                const slot = document.createElement('div');
-                slot.className = `w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-3xl border-4 ${
-                    isStamped ? 'bg-yellow-400 border-amber-600 text-amber-950 animate-stamp shadow-lg' : 'bg-white/50 border-amber-300/60 text-amber-200'
-                }`;
-                slot.innerText = '💮';
-                grid.appendChild(slot);
             }
         }
 
