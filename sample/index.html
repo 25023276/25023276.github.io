@@ -239,9 +239,6 @@
                             <i class="fas fa-phone-alt text-emerald-700 mr-3"></i>でんわ・連絡先
                         </h2>
                     </div>
-                    <button onclick="triggerEmergencyCall()" class="bg-red-600 hover:bg-red-700 text-white font-black px-4 py-3 rounded-2xl text-lg border-2 border-red-900 shadow active:scale-95 animate-pulse">
-                        🚨 119番（救急）
-                    </button>
                 </div>
                 <div id="elderly-contacts-list" class="space-y-4"></div>
             </section>
@@ -413,6 +410,26 @@
                 </div>
             </div>
 
+            <!-- 連絡先追加・管理 -->
+            <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                <h3 class="text-xl font-bold border-b pb-2 flex items-center">
+                    <i class="fas fa-phone-alt text-emerald-600 mr-2"></i>📞 連絡先の追加・管理
+                </h3>
+                <form onsubmit="handleAddContact(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input type="text" id="input-contact-name" required placeholder="お名前（例: 花子）" class="p-3 border rounded-xl font-bold">
+                    <input type="tel" id="input-contact-phone" required placeholder="電話番号（例: 090-1234-5678）" class="p-3 border rounded-xl font-bold">
+                    <input type="text" id="input-contact-role" required placeholder="続柄・肩書（例: 長女、ケアマネ）" class="p-3 border rounded-xl font-bold">
+                    <select id="input-contact-icon" class="p-3 border rounded-xl font-bold">
+                        <option value="👩">👩 女性</option>
+                        <option value="👨">👨 男性</option>
+                        <option value="🏥">🏥 病院・介護</option>
+                        <option value="📞">📞 電話アイコン</option>
+                    </select>
+                    <button type="submit" class="md:col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow">連絡先を追加</button>
+                </form>
+                <div id="caregiver-contact-list" class="space-y-2 pt-2"></div>
+            </div>
+
             <!-- 登録済み写真管理 -->
             <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
                 <h3 class="text-xl font-bold border-b pb-2">🖼️ 登録済み写真の管理・削除</h3>
@@ -485,9 +502,9 @@
                 { id: 4, category: "薬", time: "18:00", title: "ばんの食後薬をのむ", done: false }
             ],
             contacts: [
-                { name: "長女（花子）", phone: "090-1234-5678", icon: "👩", role: "長女" },
-                { name: "長男（太郎）", phone: "090-8765-4321", icon: "👨", role: "長男" },
-                { name: "ケアマネジャー", phone: "03-0000-0000", icon: "🏥", role: "担当者" }
+                { id: 1, name: "長女（花子）", phone: "090-1234-5678", icon: "👩", role: "長女" },
+                { id: 2, name: "長男（太郎）", phone: "090-8765-4321", icon: "👨", role: "長男" },
+                { id: 3, name: "ケアマネジャー", phone: "03-0000-0000", icon: "🏥", role: "担当者" }
             ],
             gallery: []
         };
@@ -513,6 +530,7 @@
                     appData = { ...appData, ...parsed };
                     if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, janken: 1, numbers: 1 };
                     if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, janken: 0, numbers: 0 };
+                    if (!appData.contacts) appData.contacts = [];
                 } catch(e) {}
             }
         }
@@ -596,12 +614,86 @@
             window.speechSynthesis.speak(uttr);
         }
 
+        /* 連絡先のレンダリング＆追加・削除 */
+        function renderContacts() {
+            const container = document.getElementById('elderly-contacts-list');
+            const caregiverList = document.getElementById('caregiver-contact-list');
+
+            if (container) container.innerHTML = '';
+            if (caregiverList) caregiverList.innerHTML = '';
+
+            if (!appData.contacts || appData.contacts.length === 0) {
+                if (container) container.innerHTML = `<div class="bg-white p-4 rounded-3xl text-center text-slate-500 font-bold border-2">連絡先が登録されていません</div>`;
+                if (caregiverList) caregiverList.innerHTML = `<span class="text-slate-400 font-bold">登録された連絡先はありません</span>`;
+                return;
+            }
+
+            // 本人モード一覧
+            if (container) {
+                appData.contacts.forEach(contact => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white border-4 border-emerald-500 rounded-3xl p-4 shadow-md flex items-center justify-between";
+                    card.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-emerald-100 text-emerald-900 rounded-2xl flex items-center justify-center text-4xl shadow border border-emerald-300">${contact.icon}</div>
+                            <div>
+                                <div class="text-xs font-bold text-emerald-800">${contact.role}</div>
+                                <div class="text-2xl font-black text-slate-900">${contact.name}</div>
+                                <div class="text-sm font-bold text-slate-500">${contact.phone}</div>
+                            </div>
+                        </div>
+                        <a href="tel:${contact.phone}" onclick="speakText('${contact.name}さんへ電話をかけます')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-2xl text-xl shadow">かける</a>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            // 家族モード一覧
+            if (caregiverList) {
+                appData.contacts.forEach(contact => {
+                    const item = document.createElement('div');
+                    item.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border";
+                    item.innerHTML = `
+                        <span>${contact.icon} ${contact.name} (${contact.role}): ${contact.phone}</span>
+                        <button onclick="deleteContact(${contact.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg flex-shrink-0">削除</button>
+                    `;
+                    caregiverList.appendChild(item);
+                });
+            }
+        }
+
+        function handleAddContact(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-contact-name').value.trim();
+            const phone = document.getElementById('input-contact-phone').value.trim();
+            const role = document.getElementById('input-contact-role').value.trim();
+            const icon = document.getElementById('input-contact-icon').value;
+
+            if (!appData.contacts) appData.contacts = [];
+            appData.contacts.push({ id: Date.now(), name, phone, role, icon });
+
+            document.getElementById('input-contact-name').value = '';
+            document.getElementById('input-contact-phone').value = '';
+            document.getElementById('input-contact-role').value = '';
+
+            saveData();
+            renderContacts();
+            alert("新しい連絡先を追加しました！");
+        }
+
+        function deleteContact(id) {
+            if (confirm("この連絡先を削除しますか？")) {
+                appData.contacts = appData.contacts.filter(c => c.id !== id);
+                saveData();
+                renderContacts();
+            }
+        }
+
         /* 体操・脳トレ ノルマ＆達成状況のレンダリング */
         function renderExerciseProgress() {
             const targets = appData.exerciseTargets || { cogni: 1, janken: 1, numbers: 1 };
             const done = appData.exerciseDone || { cogni: 0, janken: 0, numbers: 0 };
 
-            // 総目標と総達成数
             const totalTarget = targets.cogni + targets.janken + targets.numbers;
             const totalDone = Math.min(done.cogni, targets.cogni) + Math.min(done.janken, targets.janken) + Math.min(done.numbers, targets.numbers);
 
@@ -610,12 +702,10 @@
             if (doneEl) doneEl.innerText = totalDone;
             if (totalEl) totalEl.innerText = totalTarget;
 
-            // タブのバッジ目標表示
             document.getElementById('badge-target-cogni').innerText = `目標: ${targets.cogni}回`;
             document.getElementById('badge-target-janken').innerText = `目標: ${targets.janken}回`;
             document.getElementById('badge-target-numbers').innerText = `目標: ${targets.numbers}回`;
 
-            // 各ゲーム画面の表示
             document.getElementById('cogni-current-done').innerText = done.cogni;
             document.getElementById('cogni-target-val').innerText = targets.cogni;
 
@@ -625,7 +715,6 @@
             document.getElementById('numbers-current-done').innerText = done.numbers;
             document.getElementById('numbers-target-val').innerText = targets.numbers;
 
-            // フォームの初期値
             document.getElementById('input-target-cogni').value = targets.cogni;
             document.getElementById('input-target-janken').value = targets.janken;
             document.getElementById('input-target-numbers').value = targets.numbers;
@@ -813,33 +902,6 @@
             appData.schedules = appData.schedules.filter(s => s.id !== id);
             saveData();
             renderSchedule();
-        }
-
-        function renderContacts() {
-            const container = document.getElementById('elderly-contacts-list');
-            if (!container) return;
-            container.innerHTML = '';
-
-            appData.contacts.forEach(contact => {
-                const card = document.createElement('div');
-                card.className = "bg-white border-4 border-emerald-500 rounded-3xl p-4 shadow-md flex items-center justify-between";
-                card.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 bg-emerald-100 text-emerald-900 rounded-2xl flex items-center justify-center text-4xl shadow border border-emerald-300">${contact.icon}</div>
-                        <div>
-                            <div class="text-xs font-bold text-emerald-800">${contact.role}</div>
-                            <div class="text-2xl font-black text-slate-900">${contact.name}</div>
-                            <div class="text-sm font-bold text-slate-500">${contact.phone}</div>
-                        </div>
-                    </div>
-                    <a href="tel:${contact.phone}" onclick="speakText('${contact.name}さんへ電話をかけます')" class="bg-emerald-600 text-white font-black px-6 py-4 rounded-2xl text-xl shadow">かける</a>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function triggerEmergencyCall() {
-            if (confirm("119番（救急）へ電話をかけますか？")) window.location.href = "tel:119";
         }
 
         function renderGallery() {
