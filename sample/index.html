@@ -311,7 +311,7 @@
                         </button>
                     </div>
 
-                    <!-- 2. グーチョキパー手あそび (新規) -->
+                    <!-- 2. グーチョキパー手あそび -->
                     <div id="game-hands-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🖐️ 左右別々 グーチョキパー</span>
@@ -335,7 +335,7 @@
                         </button>
                     </div>
 
-                    <!-- 3. 口の体操（マイク音声認識付き） -->
+                    <!-- 3. 口の体操（マイク音声認識・ひらがな/カタカナ全対応） -->
                     <div id="game-patakara-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🗣️ 口の体操（マイク音声対応）</span>
@@ -982,8 +982,15 @@
             if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 40 });
         }
 
-        /* 3. 口の体操（マイク音声認識機能付き） */
+        /* 3. 口の体操（ひらがな・カタカナ両対応の表記揺れ吸収型ロジック） */
         const patakaraChars = ['パ', 'タ', 'カ', 'ラ'];
+        const patakaraMatchMap = {
+            'パ': ['パ', 'ぱ', 'パー', 'ぱー', 'pa'],
+            'タ': ['タ', 'た', 'ター', 'たー', 'ta'],
+            'カ': ['カ', 'か', 'カー', 'かー', 'ka'],
+            'ラ': ['ラ', 'ら', 'ラー', 'らー', 'ra']
+        };
+
         let patakaraIndex = 0;
         let recognition = null;
         let isListening = false;
@@ -1015,9 +1022,15 @@
                 }
                 document.getElementById('speech-recognized-text').innerText = `聞き取り中: 「${currentTranscript}」`;
                 
-                const target = patakaraChars[patakaraIndex];
-                if (currentTranscript.includes(target) || currentTranscript.includes(target.toLowerCase())) {
-                    speakText(`大正解！${target}と言えました！`);
+                const targetKey = patakaraChars[patakaraIndex];
+                const validKeywords = patakaraMatchMap[targetKey] || [targetKey];
+
+                const isMatched = validKeywords.some(keyword => 
+                    currentTranscript.toLowerCase().includes(keyword.toLowerCase())
+                );
+
+                if (isMatched) {
+                    speakText(`大正解！${targetKey}と言えました！`);
                     nextPatakaraStep(false);
                 }
             };
