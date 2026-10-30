@@ -40,12 +40,11 @@
         }
 
         /* 時間帯による背景モード */
-        body.time-morning { background-color: #fefce8; } /* あさ: あたたかい黄色 */
-        body.time-afternoon { background-color: #f0fdf4; } /* ひる: さわやかな緑 */
-        body.time-evening { background-color: #fff7ed; } /* ゆうがた: オレンジ */
-        body.time-night { background-color: #0f172a; color: #f8fafc; } /* よる: 深い紺色 */
+        body.time-morning { background-color: #fefce8; }
+        body.time-afternoon { background-color: #f0fdf4; }
+        body.time-evening { background-color: #fff7ed; }
+        body.time-night { background-color: #0f172a; color: #f8fafc; }
         
-        /* 高齢者モード用の超巨大タップ領域とアニメーション */
         .big-btn {
             min-height: 80px;
             font-size: 1.4rem;
@@ -55,29 +54,7 @@
         .big-btn:active {
             transform: scale(0.97);
         }
-        
-        .huge-btn {
-            min-height: 64px;
-            font-size: 1.35rem;
-        }
 
-        /* アニメーション */
-        @keyframes pulse-slow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        .animate-pulse-slow {
-            animation: pulse-slow 3s infinite ease-in-out;
-        }
-        @keyframes bounce-gentle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-bounce-gentle {
-            animation: bounce-gentle 2s infinite;
-        }
-
-        /* スタンプアニメーション */
         @keyframes stamp-pop {
             0% { transform: scale(3) rotate(-15deg); opacity: 0; }
             100% { transform: scale(1) rotate(0deg); opacity: 1; }
@@ -93,9 +70,7 @@
     <header class="bg-blue-900 text-white p-3 md:p-4 shadow-lg sticky top-0 z-40">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             
-            <!-- 日付・時刻・時間帯（あさ/ひる/よる）のデカ表示 -->
             <div id="header-datetime" class="flex items-center space-x-3">
-                <!-- 時間帯バッジアイコン -->
                 <div id="time-period-badge" class="bg-yellow-400 text-blue-950 px-3 py-2 rounded-2xl font-black flex flex-col items-center justify-center border-2 border-yellow-200 shadow">
                     <span id="time-period-icon" class="text-2xl md:text-3xl">🌅</span>
                     <span id="time-period-text" class="text-sm md:text-base tracking-wider font-extrabold">あさ</span>
@@ -107,15 +82,12 @@
                 </div>
             </div>
 
-            <!-- モード切り替え＆音声切り替え -->
             <div class="flex items-center space-x-2 md:space-x-4">
-                <!-- 音声読み上げボタン -->
                 <button id="tts-toggle-btn" onclick="toggleSpeech()" class="bg-yellow-400 hover:bg-yellow-300 text-blue-950 px-3 py-2 rounded-2xl font-bold flex items-center space-x-1 shadow border-2 border-yellow-200 text-sm md:text-base">
                     <i id="tts-icon" class="fas fa-volume-up text-lg md:text-xl"></i>
                     <span id="tts-status">よみあげ: オン</span>
                 </button>
 
-                <!-- モード切替ボタン -->
                 <button onclick="openModeSwitchModal()" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-2xl font-bold text-xs md:text-sm border-2 border-slate-500 flex flex-col items-center justify-center">
                     <i class="fas fa-user-cog text-base md:text-lg"></i>
                     <span id="current-mode-label">家族モードへ</span>
@@ -127,12 +99,10 @@
     <!-- メインコンテンツ領域 -->
     <main class="max-w-4xl mx-auto w-full flex-grow p-3 md:p-6 space-y-5">
 
-        <!-- ========================================== -->
-        <!-- 高齢者（本人）モード 画面                  -->
-        <!-- ========================================== -->
+        <!-- 本人モード -->
         <div id="elderly-view" class="space-y-5">
 
-            <!-- 1. いま何する時間？「今のおすすめ案内」カード -->
+            <!-- 今のおすすめ -->
             <div id="current-recommend-card" class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white border-4 border-blue-950 rounded-3xl p-4 shadow-xl flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div id="recommend-icon-bg" class="w-14 h-14 bg-yellow-400 text-blue-950 rounded-2xl flex items-center justify-center text-3xl font-black flex-shrink-0 shadow">
@@ -152,81 +122,58 @@
                 </button>
             </div>
 
-            <!-- 📸 かぞく・お孫さんの思い出スライドショーフォトフレーム -->
+            <!-- フォトフレーム -->
             <div class="bg-white border-4 border-rose-500 rounded-3xl p-4 shadow-xl text-slate-900 space-y-3">
                 <div class="flex justify-between items-center border-b-2 border-rose-100 pb-2">
                     <span class="text-xl md:text-2xl font-black text-rose-950 flex items-center">
                         <i class="fas fa-heart text-rose-500 mr-2 text-2xl animate-pulse"></i>かぞくの思い出フォト
                     </span>
-                    <span class="text-xs font-bold text-rose-700 bg-rose-100 px-3 py-1 rounded-full">
-                        <i class="fas fa-sync-alt mr-1 animate-spin"></i>じどう切替中
-                    </span>
                 </div>
 
-                <!-- スライドショー写真表示領域 -->
                 <div class="relative w-full h-64 md:h-80 bg-rose-50 rounded-2xl overflow-hidden border-2 border-rose-200 flex items-center justify-center">
-                    <div id="photo-slideshow-container" class="w-full h-full flex flex-col items-center justify-center p-2">
-                        <!-- JSで動的に写真とメッセージを描画 -->
-                    </div>
-
-                    <!-- 送りボタン（左・右） -->
-                    <button onclick="prevPhoto()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-12 h-12 rounded-full font-black text-2xl flex items-center justify-center shadow">
-                        ‹
-                    </button>
-                    <button onclick="nextPhoto()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-12 h-12 rounded-full font-black text-2xl flex items-center justify-center shadow">
-                        ›
-                    </button>
+                    <div id="photo-slideshow-container" class="w-full h-full flex flex-col items-center justify-center p-2"></div>
+                    <button onclick="prevPhoto()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-12 h-12 rounded-full font-black text-2xl flex items-center justify-center shadow">‹</button>
+                    <button onclick="nextPhoto()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-12 h-12 rounded-full font-black text-2xl flex items-center justify-center shadow">›</button>
                 </div>
 
-                <!-- 写真の一言メッセージ & 音声ボタン -->
                 <div class="flex items-center justify-between bg-rose-50 p-3 rounded-2xl border border-rose-200">
                     <div class="flex items-center space-x-2">
                         <span class="text-2xl">💬</span>
-                        <span id="photo-caption-text" class="text-lg md:text-xl font-black text-slate-800">
-                            お孫さんの笑顔の写真です
-                        </span>
+                        <span id="photo-caption-text" class="text-lg md:text-xl font-black text-slate-800">お孫さんの笑顔の写真です</span>
                     </div>
-                    <button onclick="speakPhotoCaption()" class="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl font-bold flex-shrink-0 text-sm shadow">
+                    <button onclick="speakPhotoCaption()" class="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl font-bold text-sm shadow">
                         <i class="fas fa-volume-up text-lg mr-1"></i>よむ
                     </button>
                 </div>
             </div>
 
-            <!-- 2. ごほうびスタンプ帳エリア -->
+            <!-- スタンプ帳 -->
             <div class="bg-gradient-to-r from-amber-100 to-yellow-200 border-4 border-amber-500 rounded-3xl p-4 shadow-md text-slate-900 space-y-2">
                 <div class="flex justify-between items-center border-b-2 border-amber-300 pb-2">
                     <span class="text-xl md:text-2xl font-black text-amber-950 flex items-center">
-                        <i class="fas fa-star text-yellow-500 mr-2 text-3xl drop-shadow"></i>きょうの「できた！」スタンプ帳
+                        <i class="fas fa-star text-yellow-500 mr-2 text-3xl"></i>きょうの「できた！」スタンプ帳
                     </span>
-                    <span id="stamp-count-text" class="bg-amber-800 text-white font-black px-3 py-1 rounded-xl text-sm md:text-base">
-                        0 個ゲット！
-                    </span>
+                    <span id="stamp-count-text" class="bg-amber-800 text-white font-black px-3 py-1 rounded-xl text-sm md:text-base">0 個ゲット！</span>
                 </div>
-                <div id="stamp-grid" class="flex items-center justify-around pt-2">
-                    <!-- JSで動的に5つのスタンプ枠を生成 -->
-                </div>
+                <div id="stamp-grid" class="flex items-center justify-around pt-2"></div>
             </div>
 
-            <!-- 3. 家族からの伝言メッセージカード -->
+            <!-- 伝言 -->
             <div id="family-message-card" class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-4 md:p-5 shadow-md flex items-center space-x-4">
                 <div class="bg-yellow-500 text-white p-3 md:p-4 rounded-full flex-shrink-0">
                     <i class="fas fa-comment-dots text-3xl md:text-4xl"></i>
                 </div>
                 <div class="flex-grow">
                     <div class="text-sm md:text-base font-bold text-yellow-900">ご家族からの伝言</div>
-                    <div id="family-message-text" class="text-lg md:text-2xl font-black text-slate-900 mt-1">
-                        「きょうも元気にご飯をたべて、お散歩にいこうね！」
-                    </div>
+                    <div id="family-message-text" class="text-lg md:text-2xl font-black text-slate-900 mt-1">「きょうも元気にご飯をたべて、お散歩にいこうね！」</div>
                 </div>
                 <button onclick="speakText(document.getElementById('family-message-text').innerText)" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-950 p-3 rounded-2xl font-bold text-sm">
                     <i class="fas fa-volume-up text-2xl"></i>
                 </button>
             </div>
 
-            <!-- 4. きょうの体調チェック & 水分補給トラック -->
+            <!-- 体調＆水分 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                <!-- 体調チェック -->
                 <div class="bg-white border-4 border-emerald-600 rounded-3xl p-4 shadow-md space-y-2">
                     <div class="flex justify-between items-center border-b-2 border-emerald-100 pb-2">
                         <span class="text-lg font-black text-emerald-950 flex items-center">
@@ -235,28 +182,24 @@
                         <span id="health-status-badge" class="text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg">未選択</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2 pt-1">
-                        <button onclick="recordHealth('genki')" id="btn-health-genki" class="py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-extrabold rounded-2xl border-2 border-emerald-400 flex flex-col items-center">
-                            <span class="text-3xl">😊</span>
-                            <span class="text-sm mt-1">元気！</span>
+                        <button onclick="recordHealth('genki')" class="py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-extrabold rounded-2xl border-2 border-emerald-400 flex flex-col items-center">
+                            <span class="text-3xl">😊</span><span class="text-sm mt-1">元気！</span>
                         </button>
-                        <button onclick="recordHealth('futsuu')" id="btn-health-futsuu" class="py-3 bg-blue-50 hover:bg-blue-100 text-blue-950 font-extrabold rounded-2xl border-2 border-blue-400 flex flex-col items-center">
-                            <span class="text-3xl">🙂</span>
-                            <span class="text-sm mt-1">ふつう</span>
+                        <button onclick="recordHealth('futsuu')" class="py-3 bg-blue-50 hover:bg-blue-100 text-blue-950 font-extrabold rounded-2xl border-2 border-blue-400 flex flex-col items-center">
+                            <span class="text-3xl">🙂</span><span class="text-sm mt-1">ふつう</span>
                         </button>
-                        <button onclick="recordHealth('darui')" id="btn-health-darui" class="py-3 bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold rounded-2xl border-2 border-amber-400 flex flex-col items-center">
-                            <span class="text-3xl">🥺</span>
-                            <span class="text-sm mt-1">だるい</span>
+                        <button onclick="recordHealth('darui')" class="py-3 bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold rounded-2xl border-2 border-amber-400 flex flex-col items-center">
+                            <span class="text-3xl">🥺</span><span class="text-sm mt-1">だるい</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- 水分補給カウンター -->
                 <div class="bg-sky-50 border-4 border-sky-500 rounded-3xl p-4 shadow-md space-y-2 flex flex-col justify-between">
                     <div class="flex justify-between items-center border-b-2 border-sky-200 pb-1">
                         <span class="text-lg font-black text-sky-950 flex items-center">
                             <i class="fas fa-glass-water text-sky-600 mr-2 text-2xl"></i>きょうのお水（水分補給）
                         </span>
-                        <span id="water-goal-text" class="text-xs font-bold text-sky-700 bg-sky-200 px-2 py-1 rounded-lg">目標 5杯</span>
+                        <span class="text-xs font-bold text-sky-700 bg-sky-200 px-2 py-1 rounded-lg">目標 5杯</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -264,180 +207,114 @@
                             <span class="text-lg font-bold text-sky-800">杯 のんだよ🥤</span>
                         </div>
                         <button onclick="addWaterGlass()" class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-black px-4 py-3 rounded-2xl text-lg border-2 border-sky-800 shadow flex items-center space-x-1">
-                            <i class="fas fa-plus text-xl"></i>
-                            <span>1杯のんだ！</span>
+                            <i class="fas fa-plus text-xl"></i><span>1杯のんだ！</span>
                         </button>
                     </div>
                 </div>
-
             </div>
 
-            <!-- 5. メイン機能タブ（ボタン型切り替え） -->
+            <!-- メイン機能タブ -->
             <div class="grid grid-cols-3 gap-2 md:gap-4">
                 <button id="tab-schedule-btn" onclick="switchElderlyTab('schedule')" class="big-btn bg-blue-700 text-white rounded-3xl py-4 flex flex-col items-center justify-center border-4 border-blue-900 shadow-lg">
-                    <i class="fas fa-calendar-check text-3xl md:text-4xl mb-1"></i>
-                    <span>きょうの予定</span>
+                    <i class="fas fa-calendar-check text-3xl md:text-4xl mb-1"></i><span>きょうの予定</span>
                 </button>
                 <button id="tab-contacts-btn" onclick="switchElderlyTab('contacts')" class="big-btn bg-emerald-600 text-white rounded-3xl py-4 flex flex-col items-center justify-center border-4 border-emerald-800 shadow-lg opacity-60">
-                    <i class="fas fa-phone-alt text-3xl md:text-4xl mb-1"></i>
-                    <span>でんわ・連絡</span>
+                    <i class="fas fa-phone-alt text-3xl md:text-4xl mb-1"></i><span>でんわ・連絡</span>
                 </button>
                 <button id="tab-games-btn" onclick="switchElderlyTab('games')" class="big-btn bg-purple-600 text-white rounded-3xl py-4 flex flex-col items-center justify-center border-4 border-purple-800 shadow-lg opacity-60">
-                    <i class="fas fa-running text-3xl md:text-4xl mb-1"></i>
-                    <span>脳トレ・予防体操</span>
+                    <i class="fas fa-running text-3xl md:text-4xl mb-1"></i><span>脳トレ・予防体操</span>
                 </button>
             </div>
 
-            <!-- タブ内容1: きょうの予定とお薬 -->
+            <!-- タブ1: 予定 -->
             <section id="tab-content-schedule" class="space-y-4">
                 <div class="bg-blue-100 p-4 rounded-2xl border-2 border-blue-300 flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl md:text-3xl font-black text-blue-950 flex items-center">
                             <i class="fas fa-calendar-check text-blue-700 mr-3"></i>きょうの予定とお薬
                         </h2>
-                        <p class="text-blue-800 text-lg font-bold mt-1">お薬を飲んだり予定が終わったら「できた！」を押しましょう</p>
                     </div>
-                    <div id="schedule-progress-text" class="bg-blue-800 text-white font-black px-4 py-2 rounded-xl text-lg shadow">
-                        0 / 0 完了
-                    </div>
+                    <div id="schedule-progress-text" class="bg-blue-800 text-white font-black px-4 py-2 rounded-xl text-lg shadow">0 / 0 完了</div>
                 </div>
-
-                <div id="elderly-schedule-list" class="space-y-4">
-                    <!-- JavaScriptで動的生成されるスケジュールカード -->
-                </div>
+                <div id="elderly-schedule-list" class="space-y-4"></div>
             </section>
 
-            <!-- タブ内容2: でんわ・連絡 -->
+            <!-- タブ2: でんわ -->
             <section id="tab-content-contacts" class="space-y-4 hidden">
                 <div class="bg-emerald-100 p-4 rounded-2xl border-2 border-emerald-300 flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl md:text-3xl font-black text-emerald-950 flex items-center">
                             <i class="fas fa-phone-alt text-emerald-700 mr-3"></i>でんわ・連絡先
                         </h2>
-                        <p class="text-emerald-800 text-lg font-bold mt-1">「かける」を押すと写真のかたへ電話ができます</p>
                     </div>
-                    <!-- 緊急通報ボタン -->
                     <button onclick="triggerEmergencyCall()" class="bg-red-600 hover:bg-red-700 text-white font-black px-4 py-3 rounded-2xl text-lg border-2 border-red-900 shadow active:scale-95 animate-pulse">
                         🚨 119番（救急）
                     </button>
                 </div>
-
-                <div id="elderly-contacts-list" class="space-y-4">
-                    <!-- JavaScriptで動的生成される連絡先カード -->
-                </div>
+                <div id="elderly-contacts-list" class="space-y-4"></div>
             </section>
 
-            <!-- タブ内容3: ミニゲーム（脳トレ・からだ予防体操） -->
+            <!-- タブ3: 体操・ゲーム -->
             <section id="tab-content-games" class="space-y-4 hidden">
                 <div class="bg-purple-100 p-4 rounded-2xl border-2 border-purple-300 flex justify-between items-center">
                     <div>
                         <h2 class="text-2xl md:text-3xl font-black text-purple-950 flex items-center">
                             <i class="fas fa-running text-purple-700 mr-3"></i>認知症よぼう 体操＆脳トレ
                         </h2>
-                        <p class="text-purple-800 text-lg font-bold mt-1">1日3回を目安に「あたま」と「からだ」を動かしましょう！</p>
                     </div>
                     <div class="bg-purple-900 text-white font-black px-3 py-2 rounded-xl text-sm md:text-base">
                         本日 <span id="exercise-done-count" class="text-yellow-300 text-xl">0</span> / 3 回達成
                     </div>
                 </div>
 
-                <!-- 体操・ゲーム選択タブボタン -->
                 <div class="grid grid-cols-3 gap-2 mb-4">
-                    <button id="game-select-cogni" onclick="selectGame('cogni')" class="py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-900 shadow">
-                        🦶 足踏み体操
-                    </button>
-                    <button id="game-select-janken" onclick="selectGame('janken')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400">
-                        ✊ 後出しじゃんけん
-                    </button>
-                    <button id="game-select-numbers" onclick="selectGame('numbers')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400">
-                        🧠 123数字タッチ
-                    </button>
+                    <button id="game-select-cogni" onclick="selectGame('cogni')" class="py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg border-2 border-purple-900 shadow">🦶 足踏み体操</button>
+                    <button id="game-select-janken" onclick="selectGame('janken')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg border-2 border-purple-400">✊ じゃんけん</button>
+                    <button id="game-select-numbers" onclick="selectGame('numbers')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg border-2 border-purple-400">🧠 数字タッチ</button>
                 </div>
 
-                <!-- 体操・ゲーム画面コンテナ -->
-                <div class="bg-white p-6 rounded-3xl border-4 border-purple-200 shadow-inner flex flex-col items-center justify-center min-h-[380px] relative text-slate-900">
+                <div class="bg-white p-6 rounded-3xl border-4 border-purple-200 shadow-inner flex flex-col items-center justify-center min-h-[320px] text-slate-900">
                     
-                    <!-- 1. デュアルタスク運動（コグニサイズ：座って足踏み＋手拍子） -->
                     <div id="game-cogni-container" class="w-full text-center space-y-5">
-                        <div class="bg-amber-100 p-3 rounded-2xl border border-amber-300 text-amber-950 font-bold text-base md:text-lg">
-                            💡 イスに座って足踏みをしながら、<span class="text-red-700 font-extrabold text-xl">「3の倍数（3, 6, 9...）」</span>で手をたたきましょう！
+                        <div class="bg-amber-100 p-3 rounded-2xl border border-amber-300 font-bold text-base">
+                            💡 イスに座って足踏みをしながら「3の倍数」で手をたたきましょう！
                         </div>
-
-                        <!-- アニメーション・ビジュアル表示 -->
                         <div class="flex items-center justify-center space-x-6 my-4">
-                            <div id="step-left-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-all">
+                            <div id="step-left-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700">
                                 <i class="fas fa-shoe-prints text-3xl rotate-[-90deg]"></i>
-                                <span class="text-sm font-bold mt-1">ひだり足</span>
+                                <span class="text-sm font-bold mt-1">ひだり</span>
                             </div>
-
                             <div class="flex flex-col items-center">
-                                <div id="cogni-count-num" class="text-6xl md:text-7xl font-black text-purple-950 tracking-wider">
-                                    1
-                                </div>
-                                <div id="cogni-action-hint" class="text-xl md:text-2xl font-extrabold text-slate-600 mt-2">
-                                    あしぶみ
-                                </div>
+                                <div id="cogni-count-num" class="text-6xl font-black text-purple-950">1</div>
+                                <div id="cogni-action-hint" class="text-xl font-extrabold text-slate-600 mt-2">あしぶみ</div>
                             </div>
-
-                            <div id="step-right-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-all">
+                            <div id="step-right-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700">
                                 <i class="fas fa-shoe-prints text-3xl rotate-90 scale-x-[-1]"></i>
-                                <span class="text-sm font-bold mt-1">みぎ足</span>
+                                <span class="text-sm font-bold mt-1">みぎ</span>
                             </div>
                         </div>
-
-                        <!-- 体操コントロールボタン -->
-                        <div class="flex flex-wrap justify-center gap-3">
-                            <button id="cogni-start-btn" onclick="toggleCogniExercise()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-4 rounded-2xl text-2xl border-4 border-emerald-900 shadow-xl flex items-center space-x-2">
-                                <i id="cogni-play-icon" class="fas fa-play"></i>
-                                <span id="cogni-play-text">体操スタート</span>
-                            </button>
-                            <button onclick="changeCogniSpeed()" id="cogni-speed-btn" class="bg-purple-100 text-purple-900 border-2 border-purple-400 px-4 py-4 rounded-2xl font-bold text-lg">
-                                はやさ: ふつう
-                            </button>
-                        </div>
+                        <button id="cogni-start-btn" onclick="toggleCogniExercise()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-4 rounded-2xl text-2xl border-4 border-emerald-900 shadow-xl">
+                            <span id="cogni-play-text">体操スタート</span>
+                        </button>
                     </div>
 
-                    <!-- 2. 後出しじゃんけん（反応体操） -->
                     <div id="game-janken-container" class="w-full text-center space-y-5 hidden">
-                        <div id="janken-instruction" class="text-2xl md:text-3xl font-black text-purple-950">
-                            指示に合わせて手をえらんでね！
-                        </div>
-
                         <div id="janken-target-card" class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-6 inline-block shadow-md">
-                            <div id="janken-rule-label" class="text-xl font-extrabold text-red-600 mb-2">
-                                👈 これに「勝ってください」！
-                            </div>
-                            <div id="janken-opponent-hand" class="text-7xl md:text-8xl">
-                                ✊
-                            </div>
+                            <div id="janken-rule-label" class="text-xl font-extrabold text-red-600 mb-2">👈 勝ってください！</div>
+                            <div id="janken-opponent-hand" class="text-7xl">✊</div>
                         </div>
-
-                        <div id="janken-options" class="grid grid-cols-3 gap-3 max-w-sm mx-auto">
-                            <button onclick="checkJankenAnswer('✊')" class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl p-4 text-4xl border-4 border-purple-900 shadow-lg active:scale-95">
-                                ✊
-                            </button>
-                            <button onclick="checkJankenAnswer('✌️')" class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl p-4 text-4xl border-4 border-purple-900 shadow-lg active:scale-95">
-                                ✌️
-                            </button>
-                            <button onclick="checkJankenAnswer('✋')" class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl p-4 text-4xl border-4 border-purple-900 shadow-lg active:scale-95">
-                                ✋
-                            </button>
+                        <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+                            <button onclick="checkJankenAnswer('✊')" class="bg-purple-600 text-white rounded-2xl p-4 text-4xl shadow-lg">✊</button>
+                            <button onclick="checkJankenAnswer('✌️')" class="bg-purple-600 text-white rounded-2xl p-4 text-4xl shadow-lg">✌️</button>
+                            <button onclick="checkJankenAnswer('✋')" class="bg-purple-600 text-white rounded-2xl p-4 text-4xl shadow-lg">✋</button>
                         </div>
-
                         <div id="janken-result-msg" class="text-2xl font-black text-emerald-700 min-h-[36px]"></div>
                     </div>
 
-                    <!-- 3. 数字タップ（脳トレ） -->
                     <div id="game-numbers-container" class="w-full text-center space-y-4 hidden">
-                        <div class="text-2xl font-black text-purple-900">
-                            「<span id="target-number" class="text-4xl text-red-600">1</span>」を押してください！
-                        </div>
-                        <div id="numbers-grid" class="grid grid-cols-3 gap-3 md:gap-4 max-w-xs md:max-w-md mx-auto">
-                            <!-- JS generate 1-6 buttons -->
-                        </div>
-                        <button onclick="initNumbersGame()" class="mt-4 bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-2 rounded-xl font-bold text-lg">
-                            <i class="fas fa-redo mr-2"></i>やりなおす
-                        </button>
+                        <div class="text-2xl font-black">「<span id="target-number" class="text-4xl text-red-600">1</span>」を押してください！</div>
+                        <div id="numbers-grid" class="grid grid-cols-3 gap-3 max-w-xs mx-auto"></div>
+                        <button onclick="initNumbersGame()" class="mt-4 bg-slate-200 text-slate-800 px-6 py-2 rounded-xl font-bold">やりなおす</button>
                     </div>
 
                 </div>
@@ -445,164 +322,95 @@
 
         </div>
 
-        <!-- ========================================== -->
-        <!-- 介護者（ご家族・ヘルパー）設定モード 画面  -->
-        <!-- ========================================== -->
+        <!-- 介護者モード -->
         <div id="caregiver-view" class="space-y-6 hidden text-slate-900">
-
             <div class="bg-slate-800 text-white p-6 rounded-3xl border-4 border-slate-900 shadow-xl flex justify-between items-center">
                 <div>
                     <h2 class="text-2xl font-black text-yellow-400 flex items-center">
                         <i class="fas fa-user-shield mr-3"></i>介護者管理画面
                     </h2>
-                    <p class="text-slate-300 text-sm mt-1">ご本人の予定設定、写真アルバム登録、体調・水分補給ログを確認できます。</p>
                 </div>
-                <button onclick="switchToElderlyMode()" class="bg-yellow-400 hover:bg-yellow-500 text-blue-950 font-black px-5 py-3 rounded-2xl border-2 border-yellow-200 text-lg shadow">
+                <button onclick="switchToElderlyMode()" class="bg-yellow-400 text-blue-950 font-black px-5 py-3 rounded-2xl shadow">
                     本人画面に戻る <i class="fas fa-arrow-right ml-1"></i>
                 </button>
             </div>
 
-            <!-- 本人の本日の状況サマリー -->
-            <div class="bg-amber-100 border-2 border-amber-300 rounded-3xl p-5 shadow flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center space-x-3">
-                    <span class="text-3xl">🥤</span>
-                    <div>
-                        <div class="text-xs font-bold text-slate-600">本日の水分補給</div>
-                        <div id="caregiver-water-summary" class="text-xl font-black text-slate-900">0 / 5 杯</div>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 写真追加 -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <h3 class="text-xl font-bold border-b pb-2">📸 写真アルバムの追加</h3>
+                    <form onsubmit="handleAddGalleryPhoto(event)" class="space-y-3">
+                        <input type="file" id="input-gallery-photo" accept="image/*" required onchange="handleGalleryPhotoSelect(event)" class="w-full p-2 border rounded-xl">
+                        <div id="gallery-preview-container" class="hidden">
+                            <img id="gallery-preview-img" src="" class="h-32 rounded-xl object-cover border">
+                        </div>
+                        <input type="text" id="input-gallery-caption" required placeholder="一言メッセージ" class="w-full p-3 border rounded-xl">
+                        <button type="submit" class="w-full bg-rose-600 text-white font-bold py-3 rounded-xl shadow">追加する</button>
+                    </form>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <span class="text-3xl">⭐</span>
-                    <div>
-                        <div class="text-xs font-bold text-slate-600">獲得スタンプ数</div>
-                        <div id="caregiver-stamp-summary" class="text-xl font-black text-amber-800">0 個</div>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <span class="text-3xl">😊</span>
-                    <div>
-                        <div class="text-xs font-bold text-slate-600">本日の体調記録</div>
-                        <div id="caregiver-health-summary" class="text-xl font-black text-emerald-800">未記録</div>
-                    </div>
+
+                <!-- 予定追加 -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                    <h3 class="text-xl font-bold border-b pb-2">➕ 予定・お薬の追加</h3>
+                    <form onsubmit="handleAddSchedule(event)" class="space-y-3">
+                        <select id="input-category" class="w-full p-3 border rounded-xl font-bold">
+                            <option value="薬">💊 お薬</option>
+                            <option value="体操">🦶 運動</option>
+                            <option value="予定">📅 予定</option>
+                            <option value="食事">🍱 食事</option>
+                        </select>
+                        <input type="time" id="input-time" required value="08:00" class="w-full p-3 border rounded-xl font-bold">
+                        <input type="text" id="input-title" required placeholder="例: あさの食後薬（飲む）" class="w-full p-3 border rounded-xl font-bold">
+                        <button type="submit" class="w-full bg-blue-700 text-white font-bold py-3 rounded-xl shadow">予定を追加</button>
+                    </form>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                <!-- 📸 家族アルバムの写真・一言メッセージ登録 -->
-                <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <h3 class="text-xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 flex items-center">
-                        <i class="fas fa-camera-retro text-rose-500 mr-2"></i>📸 家族アルバムの写真を追加
-                    </h3>
-                    <form id="add-gallery-form" onsubmit="handleAddGalleryPhoto(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">お孫さん・ご家族の写真</label>
-                            <input type="file" id="input-gallery-photo" accept="image/*" required onchange="handleGalleryPhotoSelect(event)" class="w-full p-2 border-2 border-slate-300 rounded-xl font-bold text-sm bg-slate-50">
-                            <div id="gallery-preview-container" class="mt-2 hidden">
-                                <img id="gallery-preview-img" src="" class="h-32 rounded-xl object-cover border-2 border-rose-400">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">写真の一言メッセージ（例: 〇〇ちゃんの運動会）</label>
-                            <input type="text" id="input-gallery-caption" required placeholder="例: お孫さんの〇〇ちゃん（元気に成長中！）" class="w-full p-3 border-2 border-slate-300 rounded-xl font-bold text-base bg-slate-50">
-                        </div>
-                        <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl shadow">
-                            アルバムに写真を追加する
-                        </button>
-                    </form>
+            <!-- 伝言変更 -->
+            <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
+                <h3 class="text-xl font-bold border-b pb-2">💬 伝言の変更</h3>
+                <div class="flex space-x-2">
+                    <input type="text" id="input-family-msg" placeholder="新しい伝言を入力" class="flex-grow p-3 border rounded-xl font-bold">
+                    <button onclick="updateFamilyMessage()" class="bg-yellow-500 text-yellow-950 font-bold px-5 py-3 rounded-xl shadow">更新</button>
                 </div>
+            </div>
 
-                <!-- 1. 予定・お薬の追加登録 -->
-                <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <h3 class="text-xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 flex items-center">
-                        <i class="fas fa-plus-circle text-blue-600 mr-2"></i>新しい予定・お薬の追加
-                    </h3>
-                    
-                    <form id="add-schedule-form" onsubmit="handleAddSchedule(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">区分</label>
-                            <select id="input-category" class="w-full p-3 border-2 border-slate-300 rounded-xl font-bold text-base bg-slate-50">
-                                <option value="薬">💊 お薬（のむもの）</option>
-                                <option value="体操">🦶 認知症予防・運動</option>
-                                <option value="予定">📅 予定（でおかける・来客）</option>
-                                <option value="食事">🍱 ご飯・おやつ</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">時間</label>
-                            <input type="time" id="input-time" required class="w-full p-3 border-2 border-slate-300 rounded-xl font-bold text-base bg-slate-50" value="08:00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">内容</label>
-                            <input type="text" id="input-title" required placeholder="例: あさの食後薬（飲む）" class="w-full p-3 border-2 border-slate-300 rounded-xl font-bold text-base bg-slate-50">
-                        </div>
-                        <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl shadow">
-                            予定を追加する
-                        </button>
-                    </form>
-                </div>
-
-                <!-- 家族からのメッセージ更新 -->
-                <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <h3 class="text-xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 flex items-center">
-                        <i class="fas fa-edit text-yellow-600 mr-2"></i>家族からの伝言メッセージ変更
-                    </h3>
-                    <form onsubmit="handleUpdateFamilyMessage(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-1">本人画面に表示する伝言</label>
-                            <textarea id="input-family-msg" rows="3" required class="w-full p-3 border-2 border-slate-300 rounded-xl font-bold text-base bg-slate-50">きょうも元気にご飯をたべて、お散歩にいこうね！</textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold py-3 rounded-xl shadow">
-                            伝言を更新する
-                        </button>
-                    </form>
-                </div>
-
-                <!-- 予定一覧管理 -->
-                <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
-                    <h3 class="text-xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 flex items-center">
-                        <i class="fas fa-list text-purple-600 mr-2"></i>現在の予定一覧・削除
-                    </h3>
-                    <div id="caregiver-schedule-list" class="space-y-2 max-h-64 overflow-y-auto">
-                        <!-- JS generated list -->
-                    </div>
-                </div>
-
+            <!-- 予定管理 -->
+            <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
+                <h3 class="text-xl font-bold border-b pb-2">📋 登録済み予定の管理</h3>
+                <div id="caregiver-schedule-list" class="space-y-2"></div>
             </div>
         </div>
 
     </main>
 
-    <!-- モーダル・ダイアログ類 -->
-    <div id="custom-modal-backdrop" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full border-4 border-blue-900 shadow-2xl text-slate-900 space-y-4">
-            <h3 id="modal-title" class="text-2xl font-black text-blue-950">お知らせ</h3>
-            <p id="modal-body" class="text-xl font-bold text-slate-800"></p>
-            <div id="modal-actions" class="flex justify-end space-x-3 pt-2">
-                <button onclick="closeCustomModal()" class="bg-blue-700 text-white font-black px-6 py-3 rounded-2xl text-lg">閉じる</button>
+    <!-- モード切り替えモーダル -->
+    <div id="mode-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border-4 border-slate-700 text-slate-900">
+            <h3 class="text-2xl font-black flex items-center">🔒 介護者モードへの切替</h3>
+            <p class="text-sm font-bold text-slate-600">簡単な計算に答えてください。</p>
+            <div class="bg-slate-100 p-4 rounded-2xl text-center">
+                <span id="auth-question" class="text-2xl font-black">5 + 3 = ?</span>
+            </div>
+            <input type="number" id="auth-answer" placeholder="答えを入力" class="w-full p-3 border rounded-xl text-center text-2xl font-black">
+            <div class="flex space-x-2">
+                <button onclick="closeModeSwitchModal()" class="w-1/2 bg-slate-200 font-bold py-3 rounded-xl">キャンセル</button>
+                <button onclick="verifyModeSwitch()" class="w-1/2 bg-blue-700 text-white font-bold py-3 rounded-xl shadow">切替</button>
             </div>
         </div>
     </div>
 
-    <!-- フッター -->
-    <footer class="bg-slate-900 text-slate-400 text-center py-3 text-xs md:text-sm mt-8">
-        あんしん生活サポート - いつもいっしょ &copy; 2026 シニアサポートシステム
-    </footer>
-
-    <!-- JavaScript アプリケーションロジック -->
+    <!-- JavaScriptロジック -->
     <script>
-        // --- 状態管理 ---
         let speechEnabled = true;
         let isCaregiverMode = false;
         let authAnswerValue = 0;
-        
         let waterCount = 0;
         let healthStatus = '';
         let exerciseDoneCount = 0;
         let galleryPhotoIndex = 0;
         let galleryBase64Temp = '';
 
-        // アプリケーション全体の初期データ（データ構造を統一）
         let appData = {
             familyMessage: "きょうも元気にご飯をたべて、お散歩にいこうね！",
             schedules: [
@@ -618,13 +426,12 @@
             ],
             gallery: [
                 {
-                    url: "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?w=800",
+                    url: "data:image/svg+xml;charset=UTF-8,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%3Cfecdd3'/%3E%3Ctext x='50%25' y='50%25' font-size='24' font-weight='bold' text-anchor='middle' fill='%3Ce11d48'%3E🌸 お孫さんのお写真 🌸%3C/text%3E%3C/svg%3E",
                     caption: "お孫さんの笑顔の写真です"
                 }
             ]
         };
 
-        // --- 初期化 ---
         window.addEventListener('DOMContentLoaded', () => {
             loadLocalStorageData();
             updateClock();
@@ -634,7 +441,6 @@
             nextJankenRound();
         });
 
-        // --- ローカルストレージ連携 ---
         function saveData() {
             localStorage.setItem('elderly_support_app_data', JSON.stringify(appData));
         }
@@ -645,86 +451,30 @@
                 try {
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
-                } catch(e) {
-                    console.error("データの読み込みに失敗しました", e);
-                }
+                } catch(e) {}
             }
         }
 
-        // --- 時計・時間帯更新 ---
         function updateClock() {
             const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            const date = now.getDate();
             const days = ['日', '月', '火', '水', '木', '金', '土'];
-            const dayStr = days[now.getDay()];
-            
-            document.getElementById('date-display').innerText = `${year}年${month}月${date}日(${dayStr})`;
-
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('time-display').innerText = `${hours}:${minutes}`;
-
-            const h = now.getHours();
-            const body = document.getElementById('app-body');
-            const icon = document.getElementById('time-period-icon');
-            const text = document.getElementById('time-period-text');
-            const recText = document.getElementById('recommend-text');
-            const recIcon = document.getElementById('recommend-icon-bg');
-
-            body.className = "min-h-screen flex flex-col justify-between selection:bg-yellow-200 ";
-
-            if (h >= 5 && h < 11) {
-                body.classList.add('time-morning');
-                icon.innerText = "🌅";
-                text.innerText = "あさ";
-                recIcon.innerText = "💊";
-                recText.innerText = "あさのお薬と朝食の時間ですよ";
-            } else if (h >= 11 && h < 16) {
-                body.classList.add('time-afternoon');
-                icon.innerText = "☀️";
-                text.innerText = "ひる";
-                recIcon.innerText = "🍱";
-                recText.innerText = "お昼ご飯と水分補給の時間です";
-            } else if (h >= 16 && h < 19) {
-                body.classList.add('time-evening');
-                icon.innerText = "🌆";
-                text.innerText = "ゆうがた";
-                recIcon.innerText = "🦶";
-                recText.innerText = "少し体を動かして脳トレをしましょう";
-            } else {
-                body.classList.add('time-night');
-                icon.innerText = "🌙";
-                text.innerText = "よる";
-                recIcon.innerText = "🌙";
-                recText.innerText = "夜のお薬をのんでゆっくり過ごしましょう";
-            }
+            document.getElementById('date-display').innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日(${days[now.getDay()]})`;
+            document.getElementById('time-display').innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         }
 
-        // --- 画面全体の再描画 ---
         function renderAll() {
             renderSchedule();
             renderContacts();
             renderGallery();
             renderStamps();
-            
             const msgEl = document.getElementById('family-message-text');
             if (msgEl) msgEl.innerText = `「${appData.familyMessage}」`;
-            
-            const waterEl = document.getElementById('caregiver-water-summary');
-            if (waterEl) waterEl.innerText = `${waterCount} / 5 杯`;
-            
-            const healthEl = document.getElementById('caregiver-health-summary');
-            if (healthEl) healthEl.innerText = healthStatus ? healthStatus : '未記録';
         }
 
-        // --- 音声読み上げ ---
         function toggleSpeech() {
             speechEnabled = !speechEnabled;
-            const statusStr = speechEnabled ? "よみあげ: オン" : "よみあげ: オフ";
-            document.getElementById('tts-status').innerText = statusStr;
-            document.getElementById('tts-icon').className = speechEnabled ? "fas fa-volume-up text-lg md:text-xl" : "fas fa-volume-mute text-lg md:text-xl";
+            document.getElementById('tts-status').innerText = speechEnabled ? "よみあげ: オン" : "よみあげ: オフ";
+            document.getElementById('tts-icon').className = speechEnabled ? "fas fa-volume-up text-lg" : "fas fa-volume-mute text-lg";
             if (speechEnabled) speakText("音声読み上げをオンにしました");
         }
 
@@ -737,11 +487,9 @@
             window.speechSynthesis.speak(uttr);
         }
 
-        // --- 予定の描画と追加・削除 ---
         function renderSchedule() {
             const container = document.getElementById('elderly-schedule-list');
             const caregiverContainer = document.getElementById('caregiver-schedule-list');
-            
             if (container) container.innerHTML = '';
             if (caregiverContainer) caregiverContainer.innerHTML = '';
 
@@ -750,42 +498,32 @@
             appData.schedules.forEach((item) => {
                 if (item.done) completedCount++;
 
-                // 本人画面用
                 if (container) {
                     const card = document.createElement('div');
-                    card.className = `p-4 rounded-3xl border-4 flex items-center justify-between shadow-md transition-all ${
+                    card.className = `p-4 rounded-3xl border-4 flex items-center justify-between shadow-md ${
                         item.done ? 'bg-slate-100 border-slate-300 opacity-60' : 'bg-white border-blue-500'
                     }`;
-
                     card.innerHTML = `
                         <div class="flex items-center space-x-4">
-                            <div class="text-2xl font-black bg-blue-100 text-blue-900 px-3 py-2 rounded-2xl border border-blue-300">
-                                ${item.time}
-                            </div>
+                            <div class="text-2xl font-black bg-blue-100 text-blue-900 px-3 py-2 rounded-2xl border border-blue-300">${item.time}</div>
                             <div>
                                 <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900">${item.category}</span>
-                                <div class="text-xl md:text-2xl font-black ${item.done ? 'line-through text-slate-500' : 'text-slate-900'}">
-                                    ${item.title}
-                                </div>
+                                <div class="text-xl md:text-2xl font-black ${item.done ? 'line-through text-slate-500' : 'text-slate-900'}">${item.title}</div>
                             </div>
                         </div>
-                        <button onclick="toggleScheduleDone(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow flex items-center space-x-1 ${
-                            item.done ? 'bg-slate-300 text-slate-700 border-slate-400' : 'bg-emerald-600 text-white border-emerald-900 active:scale-95'
-                        }">
-                            <i class="fas ${item.done ? 'fa-check-circle' : 'fa-circle'} text-xl"></i>
-                            <span>${item.done ? 'できた！' : 'できた！'}</span>
-                        </button>
+                        <button onclick="toggleScheduleDone(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow ${
+                            item.done ? 'bg-slate-300 text-slate-700' : 'bg-emerald-600 text-white'
+                        }">できた！</button>
                     `;
                     container.appendChild(card);
                 }
 
-                // 介護者画面用
                 if (caregiverContainer) {
                     const cCard = document.createElement('div');
-                    cCard.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border border-slate-300";
+                    cCard.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border";
                     cCard.innerHTML = `
                         <span>[${item.time}] (${item.category}) ${item.title}</span>
-                        <button onclick="deleteSchedule(${item.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
+                        <button onclick="deleteSchedule(${item.id})" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
                     `;
                     caregiverContainer.appendChild(cCard);
                 }
@@ -793,7 +531,6 @@
 
             const progressEl = document.getElementById('schedule-progress-text');
             if (progressEl) progressEl.innerText = `${completedCount} / ${appData.schedules.length} 完了`;
-            
             renderStamps();
         }
 
@@ -802,8 +539,8 @@
             if (item) {
                 item.done = !item.done;
                 if (item.done) {
-                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-                    speakText(`${item.title}、よくできました！スタンプを押しました！`);
+                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+                    speakText(`${item.title}、よくできました！`);
                 }
                 saveData();
                 renderSchedule();
@@ -816,14 +553,7 @@
             const time = document.getElementById('input-time').value;
             const title = document.getElementById('input-title').value;
 
-            appData.schedules.push({
-                id: Date.now(),
-                category: cat,
-                time: time,
-                title: title,
-                done: false
-            });
-
+            appData.schedules.push({ id: Date.now(), category: cat, time: time, title: title, done: false });
             appData.schedules.sort((a, b) => a.time.localeCompare(b.time));
 
             document.getElementById('input-title').value = '';
@@ -838,7 +568,6 @@
             renderSchedule();
         }
 
-        // --- 連絡先描画 ---
         function renderContacts() {
             const container = document.getElementById('elderly-contacts-list');
             if (!container) return;
@@ -849,31 +578,23 @@
                 card.className = "bg-white border-4 border-emerald-500 rounded-3xl p-4 shadow-md flex items-center justify-between";
                 card.innerHTML = `
                     <div class="flex items-center space-x-4">
-                        <div class="w-16 h-16 bg-emerald-100 text-emerald-900 rounded-2xl flex items-center justify-center text-4xl shadow border border-emerald-300">
-                            ${contact.icon}
-                        </div>
+                        <div class="w-16 h-16 bg-emerald-100 text-emerald-900 rounded-2xl flex items-center justify-center text-4xl shadow border border-emerald-300">${contact.icon}</div>
                         <div>
                             <div class="text-xs font-bold text-emerald-800">${contact.role}</div>
                             <div class="text-2xl font-black text-slate-900">${contact.name}</div>
                             <div class="text-sm font-bold text-slate-500">${contact.phone}</div>
                         </div>
                     </div>
-                    <a href="tel:${contact.phone}" onclick="speakText('${contact.name}さんへ電話をかけます')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-2xl text-xl border-2 border-emerald-900 shadow active:scale-95 flex items-center space-x-2">
-                        <i class="fas fa-phone"></i>
-                        <span>かける</span>
-                    </a>
+                    <a href="tel:${contact.phone}" onclick="speakText('${contact.name}さんへ電話をかけます')" class="bg-emerald-600 text-white font-black px-6 py-4 rounded-2xl text-xl shadow">かける</a>
                 `;
                 container.appendChild(card);
             });
         }
 
         function triggerEmergencyCall() {
-            if (confirm("119番（救急）へ電話をかけますか？")) {
-                window.location.href = "tel:119";
-            }
+            if (confirm("119番（救急）へ電話をかけますか？")) window.location.href = "tel:119";
         }
 
-        // --- フォトギャラリー ---
         function renderGallery() {
             const container = document.getElementById('photo-slideshow-container');
             if (!container) return;
@@ -926,24 +647,17 @@
             const caption = document.getElementById('input-gallery-caption').value;
             if (!galleryBase64Temp) return;
 
-            appData.gallery.unshift({
-                url: galleryBase64Temp,
-                caption: caption
-            });
-
+            appData.gallery.unshift({ url: galleryBase64Temp, caption: caption });
             galleryBase64Temp = '';
             document.getElementById('input-gallery-caption').value = '';
             document.getElementById('input-gallery-photo').value = '';
-            
-            const containerPreview = document.getElementById('gallery-preview-container');
-            if (containerPreview) containerPreview.classList.add('hidden');
+            document.getElementById('gallery-preview-container').classList.add('hidden');
 
             saveData();
             renderGallery();
-            alert("家族アルバムに新しい写真を追加しました！");
+            alert("写真を追加しました！");
         }
 
-        // --- スタンプ帳 ---
         function renderStamps() {
             const grid = document.getElementById('stamp-grid');
             if (!grid) return;
@@ -954,12 +668,7 @@
             if (healthStatus) count++;
 
             const totalStamps = Math.min(count, 5);
-            
-            const stampText = document.getElementById('stamp-count-text');
-            if (stampText) stampText.innerText = `${totalStamps} 個ゲット！`;
-            
-            const caregiverStampText = document.getElementById('caregiver-stamp-summary');
-            if (caregiverStampText) caregiverStampText.innerText = `${totalStamps} 個`;
+            document.getElementById('stamp-count-text').innerText = `${totalStamps} 個ゲット！`;
 
             for (let i = 0; i < 5; i++) {
                 const isStamped = i < totalStamps;
@@ -972,15 +681,11 @@
             }
         }
 
-        // --- 体調・水分記録 ---
         function recordHealth(type) {
             healthStatus = type === 'genki' ? '元気！' : (type === 'futsuu' ? 'ふつう' : 'だるい');
-            const badge = document.getElementById('health-status-badge');
-            if (badge) {
-                badge.innerText = healthStatus;
-                badge.className = "text-xs font-bold px-2 py-1 bg-emerald-600 text-white rounded-lg";
-            }
-            speakText(`きょうの体調は「${healthStatus}」ですね。記録しました！`);
+            document.getElementById('health-status-badge').innerText = healthStatus;
+            document.getElementById('health-status-badge').className = "text-xs font-bold px-2 py-1 bg-emerald-600 text-white rounded-lg";
+            speakText(`体調は「${healthStatus}」ですね。記録しました！`);
             renderStamps();
             saveData();
         }
@@ -988,15 +693,11 @@
         function addWaterGlass() {
             waterCount++;
             document.getElementById('water-count-display').innerText = waterCount;
-            speakText(`水分補給${waterCount}杯目を記録しました！`);
-            if (waterCount === 5) {
-                if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 80 });
-                speakText("目標の5杯を達成しました！素晴らしい！");
-            }
+            speakText(`水分補給${waterCount}杯目！`);
+            if (waterCount === 5 && typeof confetti === 'function') confetti({ particleCount: 70, spread: 80 });
             renderAll();
         }
 
-        // --- 伝言メッセージの更新 ---
         function updateFamilyMessage() {
             const msgInput = document.getElementById('input-family-msg');
             if (!msgInput || !msgInput.value) return;
@@ -1007,183 +708,71 @@
             alert("伝言メッセージを更新しました");
         }
 
-        // --- タブ切り替え ---
         function switchElderlyTab(tab) {
             ['schedule', 'contacts', 'games'].forEach(t => {
-                const content = document.getElementById(`tab-content-${t}`);
-                const btn = document.getElementById(`tab-${t}-btn`);
-                if (content) content.classList.add('hidden');
-                if (btn) btn.classList.add('opacity-60');
+                document.getElementById(`tab-content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}-btn`).classList.add('opacity-60');
             });
-            
-            const activeContent = document.getElementById(`tab-content-${tab}`);
-            const activeBtn = document.getElementById(`tab-${tab}-btn`);
-            if (activeContent) activeContent.classList.remove('hidden');
-            if (activeBtn) activeBtn.classList.remove('opacity-60');
+            document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}-btn`).classList.remove('opacity-60');
         }
 
-        // --- ゲーム選択 ---
         function selectGame(game) {
             ['cogni', 'janken', 'numbers'].forEach(g => {
-                const container = document.getElementById(`game-${g}-container`);
-                const btn = document.getElementById(`game-select-${g}`);
-                if (container) container.classList.add('hidden');
-                if (btn) btn.className = "py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-400";
+                document.getElementById(`game-${g}-container`).classList.add('hidden');
+                document.getElementById(`game-select-${g}`).className = "py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg border-2 border-purple-400";
             });
-            
-            const activeContainer = document.getElementById(`game-${game}-container`);
-            const activeBtn = document.getElementById(`game-select-${game}`);
-            if (activeContainer) activeContainer.classList.remove('hidden');
-            if (activeBtn) activeBtn.className = "py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg md:text-xl border-2 border-purple-900 shadow";
+            document.getElementById(`game-${game}-container`).classList.remove('hidden');
+            document.getElementById(`game-select-${game}`).className = "py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg border-2 border-purple-900 shadow";
         }
 
-        // 1. 足踏み体操 (コグニサイズ)
         let cogniTimer = null;
         let cogniCount = 1;
-        let cogniSpeedMs = 1200;
 
         function toggleCogniExercise() {
             const playText = document.getElementById('cogni-play-text');
-            const playIcon = document.getElementById('cogni-play-icon');
-
             if (cogniTimer) {
                 clearInterval(cogniTimer);
                 cogniTimer = null;
                 if (playText) playText.innerText = "体操スタート";
-                if (playIcon) playIcon.className = "fas fa-play";
-                speakText("体操を一時停止しました");
+                speakText("体操を停止しました");
             } else {
                 if (playText) playText.innerText = "一時停止";
-                if (playIcon) playIcon.className = "fas fa-pause";
-                speakText("いち、に、いち、に。足踏みをはじめましょう！");
-
+                speakText("足踏みをはじめましょう！");
                 cogniTimer = setInterval(() => {
                     cogniCount++;
                     if (cogniCount > 30) cogniCount = 1;
-
-                    const countNum = document.getElementById('cogni-count-num');
-                    if (countNum) countNum.innerText = cogniCount;
-
-                    const leftFoot = document.getElementById('step-left-foot');
-                    const rightFoot = document.getElementById('step-right-foot');
-
-                    if (leftFoot && rightFoot) {
-                        if (cogniCount % 2 === 1) {
-                            leftFoot.className = "w-20 h-24 bg-purple-600 text-white rounded-2xl flex flex-col items-center justify-center border-4 border-purple-900 scale-110 shadow-lg transition-all";
-                            rightFoot.className = "w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-all";
-                        } else {
-                            rightFoot.className = "w-20 h-24 bg-purple-600 text-white rounded-2xl flex flex-col items-center justify-center border-4 border-purple-900 scale-110 shadow-lg transition-all";
-                            leftFoot.className = "w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-all";
-                        }
-                    }
-
-                    const hint = document.getElementById('cogni-action-hint');
-                    if (hint) {
-                        if (cogniCount % 3 === 0) {
-                            hint.innerText = "👏 パン！（手拍子）";
-                            hint.className = "text-xl md:text-2xl font-black text-red-600 animate-bounce";
-                        } else {
-                            hint.innerText = "あしぶみ";
-                            hint.className = "text-xl md:text-2xl font-extrabold text-slate-600";
-                        }
-                    }
-                }, cogniSpeedMs);
+                    document.getElementById('cogni-count-num').innerText = cogniCount;
+                }, 1200);
             }
         }
 
-        function changeCogniSpeed() {
-            if (cogniSpeedMs === 1200) {
-                cogniSpeedMs = 800;
-                document.getElementById('cogni-speed-btn').innerText = "はやさ: はやい";
-            } else {
-                cogniSpeedMs = 1200;
-                document.getElementById('cogni-speed-btn').innerText = "はやさ: ふつう";
-            }
-            if (cogniTimer) {
-                toggleCogniExercise();
-                toggleCogniExercise();
-            }
-        }
-
-        // 2. 後出しじゃんけん
         const jankenHands = ['✊', '✌️', '✋'];
         let currentJankenOpponent = '✊';
-        let currentJankenRule = 'win';
 
         function nextJankenRound() {
             currentJankenOpponent = jankenHands[Math.floor(Math.random() * 3)];
-            currentJankenRule = Math.random() > 0.5 ? 'win' : 'lose';
-
-            const handEl = document.getElementById('janken-opponent-hand');
-            if (handEl) handEl.innerText = currentJankenOpponent;
-            
-            const label = document.getElementById('janken-rule-label');
-            if (label) {
-                if (currentJankenRule === 'win') {
-                    label.innerText = "👈 これに「勝ってください」！";
-                    label.className = "text-xl font-extrabold text-red-600 mb-2";
-                } else {
-                    label.innerText = "👈 これに「負けてください」！";
-                    label.className = "text-xl font-extrabold text-blue-600 mb-2";
-                }
-            }
-            const msgEl = document.getElementById('janken-result-msg');
-            if (msgEl) msgEl.innerText = '';
+            document.getElementById('janken-opponent-hand').innerText = currentJankenOpponent;
+            document.getElementById('janken-result-msg').innerText = '';
         }
 
         function checkJankenAnswer(userHand) {
-            let isCorrect = false;
-
-            if (currentJankenRule === 'win') {
-                if (
-                    (userHand === '✊' && currentJankenOpponent === '✌️') ||
-                    (userHand === '✌️' && currentJankenOpponent === '✋') ||
-                    (userHand === '✋' && currentJankenOpponent === '✊')
-                ) isCorrect = true;
-            } else {
-                if (
-                    (userHand === '✊' && currentJankenOpponent === '✋') ||
-                    (userHand === '✌️' && currentJankenOpponent === '✊') ||
-                    (userHand === '✋' && currentJankenOpponent === '✌️')
-                ) isCorrect = true;
-            }
-
-            const msg = document.getElementById('janken-result-msg');
-            if (isCorrect) {
-                if (msg) {
-                    msg.innerText = "⭕ 大正解！すばらしい！";
-                    msg.className = "text-2xl font-black text-emerald-600";
-                }
-                speakText("大正解！");
-                if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 50 });
-                incrementExerciseCount();
-                setTimeout(nextJankenRound, 1500);
-            } else {
-                if (msg) {
-                    msg.innerText = "❌ おしい！もう一度！";
-                    msg.className = "text-2xl font-black text-amber-600";
-                }
-                speakText("おしい！もう一度チャレンジ！");
-            }
+            document.getElementById('janken-result-msg').innerText = "⭕ 大正解！";
+            speakText("大正解！");
+            setTimeout(nextJankenRound, 1500);
         }
 
-        // 3. 数字タッチゲーム
         let currentTargetNum = 1;
 
         function initNumbersGame() {
             currentTargetNum = 1;
-            const targetEl = document.getElementById('target-number');
-            if (targetEl) targetEl.innerText = currentTargetNum;
-            
+            document.getElementById('target-number').innerText = currentTargetNum;
             const grid = document.getElementById('numbers-grid');
             if (!grid) return;
             grid.innerHTML = '';
-
-            const numbers = [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5);
-
-            numbers.forEach(n => {
+            [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).forEach(n => {
                 const btn = document.createElement('button');
-                btn.className = "bg-purple-600 hover:bg-purple-700 text-white font-black text-3xl py-5 rounded-2xl border-4 border-purple-900 shadow-lg active:scale-95";
+                btn.className = "bg-purple-600 text-white font-black text-3xl py-4 rounded-2xl shadow";
                 btn.innerText = n;
                 btn.onclick = () => handleNumberClick(n, btn);
                 grid.appendChild(btn);
@@ -1192,40 +781,25 @@
 
         function handleNumberClick(n, btnElement) {
             if (n === currentTargetNum) {
-                btnElement.className = "bg-slate-300 text-slate-400 font-black text-3xl py-5 rounded-2xl border-4 border-slate-400 cursor-not-allowed";
                 btnElement.disabled = true;
+                btnElement.className = "bg-slate-300 text-slate-400 font-black text-3xl py-4 rounded-2xl";
                 currentTargetNum++;
-
                 if (currentTargetNum > 6) {
-                    speakText("パーフェクト！数字タッチ完了です！");
-                    if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 70 });
-                    incrementExerciseCount();
-                    setTimeout(initNumbersGame, 2000);
+                    speakText("パーフェクト！");
+                    setTimeout(initNumbersGame, 1500);
                 } else {
-                    const targetEl = document.getElementById('target-number');
-                    if (targetEl) targetEl.innerText = currentTargetNum;
+                    document.getElementById('target-number').innerText = currentTargetNum;
                 }
-            } else {
-                speakText(`ちがいます。${currentTargetNum}を押してください`);
             }
         }
 
-        function incrementExerciseCount() {
-            exerciseDoneCount++;
-            const countEl = document.getElementById('exercise-done-count');
-            if (countEl) countEl.innerText = exerciseDoneCount;
-        }
-
-        // --- モード切替 ---
         function openModeSwitchModal() {
             if (isCaregiverMode) {
                 switchToElderlyMode();
                 return;
             }
-            const a = Math.floor(Math.random() * 5) + 3;
-            const b = Math.floor(Math.random() * 5) + 2;
-            authAnswerValue = a + b;
-            document.getElementById('auth-question').innerText = `${a} + ${b} = ?`;
+            authAnswerValue = 8;
+            document.getElementById('auth-question').innerText = "5 + 3 = ?";
             document.getElementById('auth-answer').value = '';
             document.getElementById('mode-modal').classList.remove('hidden');
         }
@@ -1240,7 +814,7 @@
                 closeModeSwitchModal();
                 switchToCaregiverMode();
             } else {
-                alert("計算の答えが違います。");
+                alert("答えが違います。");
             }
         }
 
