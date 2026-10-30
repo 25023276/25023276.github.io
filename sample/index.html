@@ -142,7 +142,7 @@
                 </div>
             </div>
 
-            <!-- スタンプ帳（予定の追加・削除に完全連動） -->
+            <!-- スタンプ帳 -->
             <div class="bg-gradient-to-r from-amber-100 to-yellow-200 border-4 border-amber-500 rounded-3xl p-4 shadow-md text-slate-900 space-y-2">
                 <div class="flex justify-between items-center border-b-2 border-amber-300 pb-2">
                     <span class="text-xl md:text-2xl font-black text-amber-950 flex items-center">
@@ -250,79 +250,128 @@
                         </h2>
                     </div>
                     <div class="bg-purple-900 text-white font-black px-3 py-2 rounded-xl text-sm md:text-base">
-                        本日 <span id="exercise-done-count" class="text-yellow-300 text-xl">0</span> / <span id="exercise-total-target" class="text-xl">3</span> 回達成
+                        本日 <span id="exercise-done-count" class="text-yellow-300 text-xl">0</span> / <span id="exercise-total-target" class="text-xl">5</span> 回達成
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 mb-4">
-                    <button id="game-select-cogni" onclick="selectGame('cogni')" class="py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg border-2 border-purple-900 shadow">
+                <!-- 5種類のメニュー切り替えボタン -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4">
+                    <button id="game-select-cogni" onclick="selectGame('cogni')" class="py-3 bg-purple-700 text-white rounded-2xl font-bold text-sm md:text-base border-2 border-purple-900 shadow">
                         🦶 足踏み体操<br><span id="badge-target-cogni" class="text-xs bg-purple-900/50 px-2 py-0.5 rounded-full mt-1 inline-block">目標: 1回</span>
                     </button>
-                    <button id="game-select-janken" onclick="selectGame('janken')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg border-2 border-purple-400">
+                    <button id="game-select-clap" onclick="selectGame('clap')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-sm md:text-base border-2 border-purple-400">
+                        👏 手拍子パズル<br><span id="badge-target-clap" class="text-xs bg-purple-900/20 px-2 py-0.5 rounded-full mt-1 inline-block">目標: 1回</span>
+                    </button>
+                    <button id="game-select-patakara" onclick="selectGame('patakara')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-sm md:text-base border-2 border-purple-400">
+                        🗣️ 口の体操<br><span id="badge-target-patakara" class="text-xs bg-purple-900/20 px-2 py-0.5 rounded-full mt-1 inline-block">目標: 1回</span>
+                    </button>
+                    <button id="game-select-janken" onclick="selectGame('janken')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-sm md:text-base border-2 border-purple-400">
                         ✊ じゃんけん<br><span id="badge-target-janken" class="text-xs bg-purple-900/20 px-2 py-0.5 rounded-full mt-1 inline-block">目標: 1回</span>
                     </button>
-                    <button id="game-select-numbers" onclick="selectGame('numbers')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg border-2 border-purple-400">
+                    <button id="game-select-numbers" onclick="selectGame('numbers')" class="py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-sm md:text-base border-2 border-purple-400 col-span-2 md:col-span-1">
                         🧠 数字タッチ<br><span id="badge-target-numbers" class="text-xs bg-purple-900/20 px-2 py-0.5 rounded-full mt-1 inline-block">目標: 1回</span>
                     </button>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl border-4 border-purple-200 shadow-inner flex flex-col items-center justify-center min-h-[320px] text-slate-900">
+                <div class="bg-white p-6 rounded-3xl border-4 border-purple-200 shadow-inner flex flex-col items-center justify-center min-h-[340px] text-slate-900">
                     
-                    <!-- 1. 足踏み体操 -->
-                    <div id="game-cogni-container" class="w-full text-center space-y-5">
+                    <!-- 1. 足踏み体操 (スピード切り替え付き) -->
+                    <div id="game-cogni-container" class="w-full text-center space-y-4">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🦶 足踏み体操</span>
                             <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="cogni-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="cogni-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
-                        <div class="bg-amber-100 p-3 rounded-2xl border border-amber-300 font-bold text-base">
+                        
+                        <!-- スピード設定エリア -->
+                        <div class="flex items-center justify-center space-x-2 bg-slate-100 p-2 rounded-2xl">
+                            <span class="text-sm font-bold text-slate-700 mr-1"><i class="fas fa-tachometer-alt mr-1"></i>はやさ:</span>
+                            <button id="speed-btn-slow" onclick="setCogniSpeed(1500, 'slow')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-800 border shadow-sm">🐢 ゆっくり</button>
+                            <button id="speed-btn-normal" onclick="setCogniSpeed(1000, 'normal')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-700 text-white shadow-sm">🚶 ふつう</button>
+                            <button id="speed-btn-fast" onclick="setCogniSpeed(600, 'fast')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-800 border shadow-sm">🐇 はやめ</button>
+                        </div>
+
+                        <div class="bg-amber-100 p-3 rounded-2xl border border-amber-300 font-bold text-sm md:text-base">
                             💡 イスに座って足踏みをしながら「3の倍数」で手をたたきましょう！
                         </div>
-                        <div class="flex items-center justify-center space-x-6 my-4">
-                            <div id="step-left-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700">
+                        <div class="flex items-center justify-center space-x-6 my-2">
+                            <div id="step-left-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-colors">
                                 <i class="fas fa-shoe-prints text-3xl rotate-[-90deg]"></i>
                                 <span class="text-sm font-bold mt-1">ひだり</span>
                             </div>
                             <div class="flex flex-col items-center">
                                 <div id="cogni-count-num" class="text-6xl font-black text-purple-950">1</div>
-                                <div id="cogni-action-hint" class="text-xl font-extrabold text-slate-600 mt-2">あしぶみ</div>
+                                <div id="cogni-action-hint" class="text-xl font-extrabold text-slate-600 mt-1">あしぶみ</div>
                             </div>
-                            <div id="step-right-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700">
+                            <div id="step-right-foot" class="w-20 h-24 bg-slate-200 rounded-2xl flex flex-col items-center justify-center border-4 border-slate-400 text-slate-700 transition-colors">
                                 <i class="fas fa-shoe-prints text-3xl rotate-90 scale-x-[-1]"></i>
                                 <span class="text-sm font-bold mt-1">みぎ</span>
                             </div>
                         </div>
-                        <button id="cogni-start-btn" onclick="toggleCogniExercise()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-4 rounded-2xl text-2xl border-4 border-emerald-900 shadow-xl">
+                        <button id="cogni-start-btn" onclick="toggleCogniExercise()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-3.5 rounded-2xl text-2xl border-4 border-emerald-900 shadow-xl">
                             <span id="cogni-play-text">体操スタート</span>
                         </button>
                     </div>
 
-                    <!-- 2. じゃんけん -->
-                    <div id="game-janken-container" class="w-full text-center space-y-5 hidden">
+                    <!-- 2. 手拍子パズル (新規) -->
+                    <div id="game-clap-container" class="w-full text-center space-y-4 hidden">
+                        <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
+                            <span class="font-extrabold text-purple-900">👏 手拍子パズル</span>
+                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="clap-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="clap-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                        </div>
+                        <div class="bg-purple-100 p-4 rounded-2xl border border-purple-300 space-y-2">
+                            <div id="clap-instruction" class="text-xl font-black text-purple-950">画面のリズムに合わせて「👏 たたく」を押しましょう！</div>
+                            <div id="clap-beat-display" class="text-5xl font-black text-purple-700 my-4">1</div>
+                        </div>
+                        <button onclick="handleClapTap()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-black px-10 py-5 rounded-3xl text-3xl shadow-xl border-4 border-amber-800">
+                            👏 パッチン！
+                        </button>
+                        <div id="clap-feedback" class="text-lg font-bold text-emerald-700 min-h-[28px]"></div>
+                    </div>
+
+                    <!-- 3. 口の体操（パタカラ）(新規) -->
+                    <div id="game-patakara-container" class="w-full text-center space-y-4 hidden">
+                        <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
+                            <span class="font-extrabold text-purple-900">🗣️ 口の体操（パタカラ）</span>
+                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="patakara-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="patakara-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200 font-bold text-slate-800">
+                            💡 お口や舌をはっきり動かして発声しましょう！誤嚥（ごえん）予防に効果的です。
+                        </div>
+                        <div id="patakara-char-display" class="text-7xl font-black text-blue-900 py-4 bg-blue-100 rounded-3xl border-2 border-blue-300 max-w-xs mx-auto shadow-inner">
+                            パ
+                        </div>
+                        <button onclick="nextPatakaraStep()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-8 py-4 rounded-2xl text-xl shadow-lg border-2 border-blue-900">
+                            おおきな声で言ったら次へ ➔
+                        </button>
+                    </div>
+
+                    <!-- 4. じゃんけん -->
+                    <div id="game-janken-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">✊ 後出しじゃんけん</span>
                             <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="janken-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="janken-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
-                        <div id="janken-target-card" class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-6 inline-block shadow-md">
-                            <div id="janken-rule-label" class="text-xl font-extrabold text-red-600 mb-2">👈 勝ってください！</div>
-                            <div id="janken-opponent-hand" class="text-7xl">✊</div>
+                        <div id="janken-target-card" class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-4 inline-block shadow-md">
+                            <div id="janken-rule-label" class="text-lg font-extrabold text-red-600 mb-1">👈 勝ってください！</div>
+                            <div id="janken-opponent-hand" class="text-6xl">✊</div>
                         </div>
                         <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto">
-                            <button onclick="checkJankenAnswer('✊')" class="bg-purple-600 text-white rounded-2xl p-4 text-4xl shadow-lg">✊</button>
-                            <button onclick="checkJankenAnswer('✌️')" class="bg-purple-600 text-white rounded-2xl p-4 text-4xl shadow-lg">✌️</button>
-                            <button onclick="checkJankenAnswer('✋')" class="bg-purple-600 text-white rounded-2xl p-4 text-4xl shadow-lg">✋</button>
+                            <button onclick="checkJankenAnswer('✊')" class="bg-purple-600 text-white rounded-2xl p-3 text-3xl shadow-lg">✊</button>
+                            <button onclick="checkJankenAnswer('✌️')" class="bg-purple-600 text-white rounded-2xl p-3 text-3xl shadow-lg">✌️</button>
+                            <button onclick="checkJankenAnswer('✋')" class="bg-purple-600 text-white rounded-2xl p-3 text-3xl shadow-lg">✋</button>
                         </div>
-                        <div id="janken-result-msg" class="text-2xl font-black text-emerald-700 min-h-[36px]"></div>
+                        <div id="janken-result-msg" class="text-xl font-black text-emerald-700 min-h-[30px]"></div>
                     </div>
 
-                    <!-- 3. 数字タッチ -->
+                    <!-- 5. 数字タッチ -->
                     <div id="game-numbers-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🧠 数字タッチ</span>
                             <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="numbers-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="numbers-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
-                        <div class="text-2xl font-black">「<span id="target-number" class="text-4xl text-red-600">1</span>」を押してください！</div>
+                        <div class="text-xl font-black">「<span id="target-number" class="text-3xl text-red-600">1</span>」を押してください！</div>
                         <div id="numbers-grid" class="grid grid-cols-3 gap-3 max-w-xs mx-auto"></div>
-                        <button onclick="initNumbersGame()" class="mt-4 bg-slate-200 text-slate-800 px-6 py-2 rounded-xl font-bold">やりなおす</button>
+                        <button onclick="initNumbersGame()" class="mt-2 bg-slate-200 text-slate-800 px-6 py-2 rounded-xl font-bold">やりなおす</button>
                     </div>
 
                 </div>
@@ -349,27 +398,26 @@
                     <i class="fas fa-bullseye text-purple-600 mr-2"></i>脳トレ・予防体操のノルマ（目標回数）設定
                 </h3>
                 <form onsubmit="handleUpdateExerciseTargets(event)" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 space-y-1">
-                            <label class="block text-sm font-bold text-purple-900">🦶 足踏み体操</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" id="input-target-cogni" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-xl">
-                                <span class="font-bold">回</span>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                        <div class="bg-purple-50 p-2 rounded-2xl border border-purple-200 space-y-1">
+                            <label class="block text-xs font-bold text-purple-900">🦶 足踏み</label>
+                            <input type="number" id="input-target-cogni" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-lg">
                         </div>
-                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 space-y-1">
-                            <label class="block text-sm font-bold text-purple-900">✊ じゃんけん</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" id="input-target-janken" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-xl">
-                                <span class="font-bold">回</span>
-                            </div>
+                        <div class="bg-purple-50 p-2 rounded-2xl border border-purple-200 space-y-1">
+                            <label class="block text-xs font-bold text-purple-900">👏 手拍子</label>
+                            <input type="number" id="input-target-clap" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-lg">
                         </div>
-                        <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 space-y-1">
-                            <label class="block text-sm font-bold text-purple-900">🧠 数字タッチ</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" id="input-target-numbers" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-xl">
-                                <span class="font-bold">回</span>
-                            </div>
+                        <div class="bg-purple-50 p-2 rounded-2xl border border-purple-200 space-y-1">
+                            <label class="block text-xs font-bold text-purple-900">🗣️ パタカラ</label>
+                            <input type="number" id="input-target-patakara" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-lg">
+                        </div>
+                        <div class="bg-purple-50 p-2 rounded-2xl border border-purple-200 space-y-1">
+                            <label class="block text-xs font-bold text-purple-900">✊ じゃんけん</label>
+                            <input type="number" id="input-target-janken" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-lg">
+                        </div>
+                        <div class="bg-purple-50 p-2 rounded-2xl border border-purple-200 space-y-1">
+                            <label class="block text-xs font-bold text-purple-900">🧠 数字タッチ</label>
+                            <input type="number" id="input-target-numbers" min="1" max="10" required class="w-full p-2 border rounded-xl font-bold text-center text-lg">
                         </div>
                     </div>
                     <button type="submit" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 rounded-xl shadow">ノルマ設定を保存</button>
@@ -463,7 +511,7 @@
             <input type="number" id="auth-answer" placeholder="答えを入力" class="w-full p-3 border rounded-xl text-center text-2xl font-black">
             <div class="flex space-x-2">
                 <button onclick="closeModeSwitchModal()" class="w-1/2 bg-slate-200 font-bold py-3 rounded-xl">キャンセル</button>
-                <button onclick="verifyModeSwitch()" class="w-1/2 bg-blue-700 text-white font-bold py-3 rounded-xl shadow text-white">切替</button>
+                <button onclick="verifyModeSwitch()" class="w-1/2 bg-blue-700 text-white font-bold py-3 rounded-xl shadow">切替</button>
             </div>
         </div>
     </div>
@@ -479,8 +527,8 @@
         let galleryBase64Temp = '';
 
         let appData = {
-            exerciseTargets: { cogni: 1, janken: 1, numbers: 1 },
-            exerciseDone: { cogni: 0, janken: 0, numbers: 0 },
+            exerciseTargets: { cogni: 1, clap: 1, patakara: 1, janken: 1, numbers: 1 },
+            exerciseDone: { cogni: 0, clap: 0, patakara: 0, janken: 0, numbers: 0 },
             messages: [
                 { id: 1, text: "きょうも元気にご飯をたべて、お散歩にいこうね！" }
             ],
@@ -517,8 +565,8 @@
                 try {
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
-                    if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, janken: 1, numbers: 1 };
-                    if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, janken: 0, numbers: 0 };
+                    if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, clap: 1, patakara: 1, janken: 1, numbers: 1 };
+                    if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, clap: 0, patakara: 0, janken: 0, numbers: 0 };
                     if (!appData.contacts) appData.contacts = [];
                     if (!appData.schedules) appData.schedules = [];
                 } catch(e) {}
@@ -604,23 +652,16 @@
             window.speechSynthesis.speak(uttr);
         }
 
-        /* スタンプ帳（登録された予定の件数＋体調1枠＋水分1枠に完全に動的適合） */
         function renderStamps() {
             const grid = document.getElementById('stamp-grid');
             if (!grid) return;
             grid.innerHTML = '';
 
-            // 1. 完了した予定の件数
             const completedSchedulesCount = appData.schedules.filter(s => s.done).length;
-            // 2. 体調入力達成 (1枠)
             const healthDone = healthStatus ? 1 : 0;
-            // 3. 水分目標(5杯)達成 (1枠)
             const waterDone = waterCount >= 5 ? 1 : 0;
 
-            // 獲得済みスタンプ数
             const totalEarnedStamps = completedSchedulesCount + healthDone + waterDone;
-
-            // スタンプの総枠数 ＝ 登録予定数 ＋ 体調(1枠) ＋ 水分(1枠)
             const totalStampSlots = appData.schedules.length + 2;
 
             document.getElementById('stamp-count-text').innerText = `${totalEarnedStamps} / ${totalStampSlots} 個ゲット！`;
@@ -680,8 +721,6 @@
 
             const progressEl = document.getElementById('schedule-progress-text');
             if (progressEl) progressEl.innerText = `${completedCount} / ${appData.schedules.length} 完了`;
-            
-            // 予定数に連動してスタンプ帳を再描写
             renderStamps();
         }
 
@@ -719,7 +758,6 @@
             renderSchedule();
         }
 
-        /* 連絡先のレンダリング＆追加・削除 */
         function renderContacts() {
             const container = document.getElementById('elderly-contacts-list');
             const caregiverList = document.getElementById('caregiver-contact-list');
@@ -792,54 +830,64 @@
             }
         }
 
-        /* 体操・脳トレ ノルマ＆達成状況のレンダリング */
+        /* 予防メニュー5種ノルマ管理 */
         function renderExerciseProgress() {
-            const targets = appData.exerciseTargets || { cogni: 1, janken: 1, numbers: 1 };
-            const done = appData.exerciseDone || { cogni: 0, janken: 0, numbers: 0 };
+            const targets = appData.exerciseTargets || { cogni: 1, clap: 1, patakara: 1, janken: 1, numbers: 1 };
+            const done = appData.exerciseDone || { cogni: 0, clap: 0, patakara: 0, janken: 0, numbers: 0 };
 
-            const totalTarget = targets.cogni + targets.janken + targets.numbers;
-            const totalDone = Math.min(done.cogni, targets.cogni) + Math.min(done.janken, targets.janken) + Math.min(done.numbers, targets.numbers);
+            const totalTarget = (targets.cogni || 1) + (targets.clap || 1) + (targets.patakara || 1) + (targets.janken || 1) + (targets.numbers || 1);
+            const totalDone = Math.min(done.cogni || 0, targets.cogni || 1) + 
+                              Math.min(done.clap || 0, targets.clap || 1) + 
+                              Math.min(done.patakara || 0, targets.patakara || 1) + 
+                              Math.min(done.janken || 0, targets.janken || 1) + 
+                              Math.min(done.numbers || 0, targets.numbers || 1);
 
-            const doneEl = document.getElementById('exercise-done-count');
-            const totalEl = document.getElementById('exercise-total-target');
-            if (doneEl) doneEl.innerText = totalDone;
-            if (totalEl) totalEl.innerText = totalTarget;
+            document.getElementById('exercise-done-count').innerText = totalDone;
+            document.getElementById('exercise-total-target').innerText = totalTarget;
 
-            document.getElementById('badge-target-cogni').innerText = `目標: ${targets.cogni}回`;
-            document.getElementById('badge-target-janken').innerText = `目標: ${targets.janken}回`;
-            document.getElementById('badge-target-numbers').innerText = `目標: ${targets.numbers}回`;
+            document.getElementById('badge-target-cogni').innerText = `目標: ${targets.cogni || 1}回`;
+            document.getElementById('badge-target-clap').innerText = `目標: ${targets.clap || 1}回`;
+            document.getElementById('badge-target-patakara').innerText = `目標: ${targets.patakara || 1}回`;
+            document.getElementById('badge-target-janken').innerText = `目標: ${targets.janken || 1}回`;
+            document.getElementById('badge-target-numbers').innerText = `目標: ${targets.numbers || 1}回`;
 
-            document.getElementById('cogni-current-done').innerText = done.cogni;
-            document.getElementById('cogni-target-val').innerText = targets.cogni;
+            document.getElementById('cogni-current-done').innerText = done.cogni || 0;
+            document.getElementById('cogni-target-val').innerText = targets.cogni || 1;
 
-            document.getElementById('janken-current-done').innerText = done.janken;
-            document.getElementById('janken-target-val').innerText = targets.janken;
+            document.getElementById('clap-current-done').innerText = done.clap || 0;
+            document.getElementById('clap-target-val').innerText = targets.clap || 1;
 
-            document.getElementById('numbers-current-done').innerText = done.numbers;
-            document.getElementById('numbers-target-val').innerText = targets.numbers;
+            document.getElementById('patakara-current-done').innerText = done.patakara || 0;
+            document.getElementById('patakara-target-val').innerText = targets.patakara || 1;
 
-            document.getElementById('input-target-cogni').value = targets.cogni;
-            document.getElementById('input-target-janken').value = targets.janken;
-            document.getElementById('input-target-numbers').value = targets.numbers;
+            document.getElementById('janken-current-done').innerText = done.janken || 0;
+            document.getElementById('janken-target-val').innerText = targets.janken || 1;
+
+            document.getElementById('numbers-current-done').innerText = done.numbers || 0;
+            document.getElementById('numbers-target-val').innerText = targets.numbers || 1;
+
+            document.getElementById('input-target-cogni').value = targets.cogni || 1;
+            document.getElementById('input-target-clap').value = targets.clap || 1;
+            document.getElementById('input-target-patakara').value = targets.patakara || 1;
+            document.getElementById('input-target-janken').value = targets.janken || 1;
+            document.getElementById('input-target-numbers').value = targets.numbers || 1;
         }
 
         function incrementExerciseDone(type) {
-            if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, janken: 0, numbers: 0 };
-            appData.exerciseDone[type]++;
+            if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, clap: 0, patakara: 0, janken: 0, numbers: 0 };
+            appData.exerciseDone[type] = (appData.exerciseDone[type] || 0) + 1;
             saveData();
             renderExerciseProgress();
         }
 
         function handleUpdateExerciseTargets(e) {
             e.preventDefault();
-            const cogniVal = parseInt(document.getElementById('input-target-cogni').value) || 1;
-            const jankenVal = parseInt(document.getElementById('input-target-janken').value) || 1;
-            const numbersVal = parseInt(document.getElementById('input-target-numbers').value) || 1;
-
             appData.exerciseTargets = {
-                cogni: cogniVal,
-                janken: jankenVal,
-                numbers: numbersVal
+                cogni: parseInt(document.getElementById('input-target-cogni').value) || 1,
+                clap: parseInt(document.getElementById('input-target-clap').value) || 1,
+                patakara: parseInt(document.getElementById('input-target-patakara').value) || 1,
+                janken: parseInt(document.getElementById('input-target-janken').value) || 1,
+                numbers: parseInt(document.getElementById('input-target-numbers').value) || 1
             };
 
             saveData();
@@ -847,7 +895,168 @@
             alert("ノルマ設定を更新しました！");
         }
 
-        /* 伝言表示 */
+        function selectGame(game) {
+            ['cogni', 'clap', 'patakara', 'janken', 'numbers'].forEach(g => {
+                document.getElementById(`game-${g}-container`).classList.add('hidden');
+                document.getElementById(`game-select-${g}`).className = "py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-sm md:text-base border-2 border-purple-400";
+            });
+            document.getElementById(`game-${game}-container`).classList.remove('hidden');
+            document.getElementById(`game-select-${game}`).className = "py-3 bg-purple-700 text-white rounded-2xl font-bold text-sm md:text-base border-2 border-purple-900 shadow";
+            
+            if (game === 'clap') initClapGame();
+            if (game === 'patakara') initPatakaraGame();
+        }
+
+        /* 1. 足踏み体操 (スピード可変機能) */
+        let cogniTimer = null;
+        let cogniCount = 1;
+        let cogniSpeedMs = 1000;
+
+        function setCogniSpeed(speedMs, mode) {
+            cogniSpeedMs = speedMs;
+            ['slow', 'normal', 'fast'].forEach(m => {
+                const btn = document.getElementById(`speed-btn-${m}`);
+                if (m === mode) {
+                    btn.className = "px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-700 text-white shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-800 border shadow-sm";
+                }
+            });
+            if (cogniTimer) {
+                toggleCogniExercise();
+                toggleCogniExercise();
+            }
+        }
+
+        function toggleCogniExercise() {
+            const playText = document.getElementById('cogni-play-text');
+            if (cogniTimer) {
+                clearInterval(cogniTimer);
+                cogniTimer = null;
+                if (playText) playText.innerText = "体操スタート";
+                speakText("体操を停止しました");
+            } else {
+                if (playText) playText.innerText = "一時停止";
+                speakText("足踏みをはじめましょう！");
+                cogniTimer = setInterval(() => {
+                    cogniCount++;
+                    if (cogniCount > 30) {
+                        clearInterval(cogniTimer);
+                        cogniTimer = null;
+                        cogniCount = 1;
+                        if (playText) playText.innerText = "体操スタート";
+                        incrementExerciseDone('cogni');
+                        speakText("お疲れ様でした！足踏み体操達成です！");
+                        if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+                    }
+                    document.getElementById('cogni-count-num').innerText = cogniCount;
+                }, cogniSpeedMs);
+            }
+        }
+
+        /* 2. 手拍子パズル (新規) */
+        let clapBeat = 1;
+        let clapTimer = null;
+
+        function initClapGame() {
+            clapBeat = 1;
+            if (clapTimer) clearInterval(clapTimer);
+            document.getElementById('clap-beat-display').innerText = "1";
+            document.getElementById('clap-feedback').innerText = "";
+            
+            clapTimer = setInterval(() => {
+                clapBeat = (clapBeat % 4) + 1;
+                document.getElementById('clap-beat-display').innerText = clapBeat;
+            }, 1000);
+        }
+
+        function handleClapTap() {
+            if (clapBeat === 3) {
+                document.getElementById('clap-feedback').innerText = "👏 タイミングばっちり！達成です！";
+                speakText("ナイス手拍子！");
+                incrementExerciseDone('clap');
+                if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 50 });
+            } else {
+                document.getElementById('clap-feedback').innerText = "惜しい！「3」のタイミングで叩きましょう！";
+            }
+        }
+
+        /* 3. 口の体操パタカラ (新規) */
+        const patakaraChars = ['パ', 'タ', 'カ', 'ラ'];
+        let patakaraIndex = 0;
+
+        function initPatakaraGame() {
+            patakaraIndex = 0;
+            document.getElementById('patakara-char-display').innerText = patakaraChars[0];
+            speakText("「パ」とおおきく発声しましょう");
+        }
+
+        function nextPatakaraStep() {
+            patakaraIndex++;
+            if (patakaraIndex < patakaraChars.length) {
+                const char = patakaraChars[patakaraIndex];
+                document.getElementById('patakara-char-display').innerText = char;
+                speakText(`つぎは「${char}」です`);
+            } else {
+                speakText("お見事！口の予防体操1回達成です！");
+                incrementExerciseDone('patakara');
+                if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+                initPatakaraGame();
+            }
+        }
+
+        /* 4. じゃんけん */
+        const jankenHands = ['✊', '✌️', '✋'];
+        let currentJankenOpponent = '✊';
+
+        function nextJankenRound() {
+            currentJankenOpponent = jankenHands[Math.floor(Math.random() * 3)];
+            document.getElementById('janken-opponent-hand').innerText = currentJankenOpponent;
+            document.getElementById('janken-result-msg').innerText = '';
+        }
+
+        function checkJankenAnswer(userHand) {
+            document.getElementById('janken-result-msg').innerText = "⭕ 大正解！";
+            speakText("大正解！");
+            incrementExerciseDone('janken');
+            if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 50 });
+            setTimeout(nextJankenRound, 1500);
+        }
+
+        /* 5. 数字タッチ */
+        let currentTargetNum = 1;
+
+        function initNumbersGame() {
+            currentTargetNum = 1;
+            document.getElementById('target-number').innerText = currentTargetNum;
+            const grid = document.getElementById('numbers-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).forEach(n => {
+                const btn = document.createElement('button');
+                btn.className = "bg-purple-600 text-white font-black text-3xl py-3 rounded-2xl shadow";
+                btn.innerText = n;
+                btn.onclick = () => handleNumberClick(n, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleNumberClick(n, btnElement) {
+            if (n === currentTargetNum) {
+                btnElement.disabled = true;
+                btnElement.className = "bg-slate-300 text-slate-400 font-black text-3xl py-3 rounded-2xl";
+                currentTargetNum++;
+                if (currentTargetNum > 6) {
+                    speakText("パーフェクト！");
+                    incrementExerciseDone('numbers');
+                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+                    setTimeout(initNumbersGame, 1500);
+                } else {
+                    document.getElementById('target-number').innerText = currentTargetNum;
+                }
+            }
+        }
+
         function renderMessages() {
             const container = document.getElementById('family-message-container');
             const caregiverMsgList = document.getElementById('caregiver-message-list');
@@ -907,10 +1116,7 @@
             if (!input || !input.value.trim()) return;
 
             if (!appData.messages) appData.messages = [];
-            appData.messages.unshift({
-                id: Date.now(),
-                text: input.value.trim()
-            });
+            appData.messages.unshift({ id: Date.now(), text: input.value.trim() });
 
             input.value = '';
             saveData();
@@ -1050,94 +1256,6 @@
             });
             document.getElementById(`tab-content-${tab}`).classList.remove('hidden');
             document.getElementById(`tab-${tab}-btn`).classList.remove('opacity-60');
-        }
-
-        function selectGame(game) {
-            ['cogni', 'janken', 'numbers'].forEach(g => {
-                document.getElementById(`game-${g}-container`).classList.add('hidden');
-                document.getElementById(`game-select-${g}`).className = "py-3 bg-purple-300 text-purple-950 rounded-2xl font-bold text-lg border-2 border-purple-400";
-            });
-            document.getElementById(`game-${game}-container`).classList.remove('hidden');
-            document.getElementById(`game-select-${game}`).className = "py-3 bg-purple-700 text-white rounded-2xl font-bold text-lg border-2 border-purple-900 shadow";
-        }
-
-        let cogniTimer = null;
-        let cogniCount = 1;
-
-        function toggleCogniExercise() {
-            const playText = document.getElementById('cogni-play-text');
-            if (cogniTimer) {
-                clearInterval(cogniTimer);
-                cogniTimer = null;
-                if (playText) playText.innerText = "体操スタート";
-                speakText("体操を停止しました");
-            } else {
-                if (playText) playText.innerText = "一時停止";
-                speakText("足踏みをはじめましょう！");
-                cogniTimer = setInterval(() => {
-                    cogniCount++;
-                    if (cogniCount > 30) {
-                        clearInterval(cogniTimer);
-                        cogniTimer = null;
-                        cogniCount = 1;
-                        if (playText) playText.innerText = "体操スタート";
-                        incrementExerciseDone('cogni');
-                        speakText("お疲れ様でした！足踏み体操1回達成です！");
-                        if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
-                    }
-                    document.getElementById('cogni-count-num').innerText = cogniCount;
-                }, 1000);
-            }
-        }
-
-        const jankenHands = ['✊', '✌️', '✋'];
-        let currentJankenOpponent = '✊';
-
-        function nextJankenRound() {
-            currentJankenOpponent = jankenHands[Math.floor(Math.random() * 3)];
-            document.getElementById('janken-opponent-hand').innerText = currentJankenOpponent;
-            document.getElementById('janken-result-msg').innerText = '';
-        }
-
-        function checkJankenAnswer(userHand) {
-            document.getElementById('janken-result-msg').innerText = "⭕ 大正解！";
-            speakText("大正解！");
-            incrementExerciseDone('janken');
-            if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 50 });
-            setTimeout(nextJankenRound, 1500);
-        }
-
-        let currentTargetNum = 1;
-
-        function initNumbersGame() {
-            currentTargetNum = 1;
-            document.getElementById('target-number').innerText = currentTargetNum;
-            const grid = document.getElementById('numbers-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            [1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).forEach(n => {
-                const btn = document.createElement('button');
-                btn.className = "bg-purple-600 text-white font-black text-3xl py-4 rounded-2xl shadow";
-                btn.innerText = n;
-                btn.onclick = () => handleNumberClick(n, btn);
-                grid.appendChild(btn);
-            });
-        }
-
-        function handleNumberClick(n, btnElement) {
-            if (n === currentTargetNum) {
-                btnElement.disabled = true;
-                btnElement.className = "bg-slate-300 text-slate-400 font-black text-3xl py-4 rounded-2xl";
-                currentTargetNum++;
-                if (currentTargetNum > 6) {
-                    speakText("パーフェクト！");
-                    incrementExerciseDone('numbers');
-                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
-                    setTimeout(initNumbersGame, 1500);
-                } else {
-                    document.getElementById('target-number').innerText = currentTargetNum;
-                }
-            }
         }
 
         function openModeSwitchModal() {
