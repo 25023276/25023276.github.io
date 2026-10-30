@@ -132,7 +132,7 @@
                 <div class="flex items-center justify-between bg-rose-50 p-3 rounded-2xl border border-rose-200">
                     <div class="flex items-center space-x-2">
                         <span class="text-2xl">💬</span>
-                        <span id="photo-caption-text" class="text-lg md:text-xl font-black text-slate-800">お孫さんの笑顔の写真です</span>
+                        <span id="photo-caption-text" class="text-lg md:text-xl font-black text-slate-800">写真を登録してください</span>
                     </div>
                     <button onclick="speakPhotoCaption()" class="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl font-bold text-sm shadow">
                         <i class="fas fa-volume-up text-lg mr-1"></i>よむ
@@ -359,6 +359,12 @@
                 </div>
             </div>
 
+            <!-- 登録済み写真管理（削除機能） -->
+            <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
+                <h3 class="text-xl font-bold border-b pb-2">🖼️ 登録済み写真の管理・削除</h3>
+                <div id="caregiver-gallery-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+
             <!-- 伝言変更 -->
             <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
                 <h3 class="text-xl font-bold border-b pb-2">💬 伝言の変更</h3>
@@ -417,12 +423,7 @@
                 { name: "長男（太郎）", phone: "090-8765-4321", icon: "👨", role: "長男" },
                 { name: "ケアマネジャー", phone: "03-0000-0000", icon: "🏥", role: "担当者" }
             ],
-            gallery: [
-                {
-                    url: "data:image/svg+xml;charset=UTF-8,%3Csvg width='400' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100%25' height='100%25' fill='%3Cfecdd3'/%3E%3Ctext x='50%25' y='50%25' font-size='24' font-weight='bold' text-anchor='middle' fill='%3Ce11d48'%3E🌸 お孫さんのお写真 🌸%3C/text%3E%3C/svg%3E",
-                    caption: "お孫さんの笑顔の写真です"
-                }
-            ]
+            gallery: [] // サンプル写真を削除（空の配列）
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -590,10 +591,37 @@
 
         function renderGallery() {
             const container = document.getElementById('photo-slideshow-container');
+            const caregiverGalleryList = document.getElementById('caregiver-gallery-list');
+            
+            if (caregiverGalleryList) caregiverGalleryList.innerHTML = '';
+
+            // 家族モード用の写真管理リスト描画
+            if (caregiverGalleryList) {
+                if (!appData.gallery || appData.gallery.length === 0) {
+                    caregiverGalleryList.innerHTML = `<span class="text-slate-400 font-bold col-span-2">写真が登録されていません</span>`;
+                } else {
+                    appData.gallery.forEach((photo, index) => {
+                        const item = document.createElement('div');
+                        item.className = "flex items-center justify-between bg-slate-100 p-2 rounded-xl border";
+                        item.innerHTML = `
+                            <div class="flex items-center space-x-3 overflow-hidden">
+                                <img src="${photo.url}" class="w-12 h-12 object-cover rounded-lg border flex-shrink-0">
+                                <span class="text-sm font-bold truncate">${photo.caption}</span>
+                            </div>
+                            <button onclick="deleteGalleryPhoto(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-2 rounded-lg flex-shrink-0 ml-2">削除</button>
+                        `;
+                        caregiverGalleryList.appendChild(item);
+                    });
+                }
+            }
+
+            // 本人モード用のフォトスライドショー描画
             if (!container) return;
 
             if (!appData.gallery || appData.gallery.length === 0) {
-                container.innerHTML = `<span class="text-slate-400 font-bold">写真が登録されていません</span>`;
+                container.innerHTML = `<span class="text-slate-400 font-bold">写真は登録されていません</span>`;
+                const captionEl = document.getElementById('photo-caption-text');
+                if (captionEl) captionEl.innerText = "写真を登録してください";
                 return;
             }
             const current = appData.gallery[galleryPhotoIndex % appData.gallery.length];
@@ -640,15 +668,27 @@
             const caption = document.getElementById('input-gallery-caption').value;
             if (!galleryBase64Temp) return;
 
+            if (!appData.gallery) appData.gallery = [];
+
             appData.gallery.unshift({ url: galleryBase64Temp, caption: caption });
             galleryBase64Temp = '';
             document.getElementById('input-gallery-caption').value = '';
             document.getElementById('input-gallery-photo').value = '';
             document.getElementById('gallery-preview-container').classList.add('hidden');
 
+            galleryPhotoIndex = 0;
             saveData();
             renderGallery();
-            alert("写真を追加しました！");
+            alert("新しい写真を追加しました！");
+        }
+
+        function deleteGalleryPhoto(index) {
+            if (confirm("この写真を削除しますか？")) {
+                appData.gallery.splice(index, 1);
+                galleryPhotoIndex = 0;
+                saveData();
+                renderGallery();
+            }
         }
 
         function renderStamps() {
@@ -786,7 +826,6 @@
             }
         }
 
-        /* --- モード切り替え処理（修正・安定化） --- */
         function openModeSwitchModal() {
             if (isCaregiverMode) {
                 switchToElderlyMode();
