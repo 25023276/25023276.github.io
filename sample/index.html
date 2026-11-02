@@ -406,6 +406,20 @@
                 </button>
             </div>
 
+            <!-- 暗証番号（パスワード）設定フォーム -->
+            <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
+                <h3 class="text-xl font-bold border-b pb-2 flex items-center">
+                    <i class="fas fa-key text-yellow-600 mr-2"></i>🔒 モード切替の暗証番号（パスワード）設定
+                </h3>
+                <form onsubmit="handleUpdatePassword(event)" class="space-y-3">
+                    <p class="text-xs font-bold text-slate-600">本人が誤って家族モードに入らないよう保護する暗証番号を設定します。（初期設定: 1234）</p>
+                    <div class="flex space-x-2">
+                        <input type="number" id="input-caregiver-password" required placeholder="例: 1234" class="flex-grow p-3 border rounded-xl font-bold text-lg">
+                        <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-6 py-3 rounded-xl shadow">保存する</button>
+                    </div>
+                </form>
+            </div>
+
             <!-- ノルマ設定フォーム -->
             <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
                 <h3 class="text-xl font-bold border-b pb-2 flex items-center">
@@ -517,12 +531,9 @@
     <!-- モード切り替え認証用ポップアップ -->
     <div id="mode-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 border-4 border-slate-700 text-slate-900">
-            <h3 class="text-2xl font-black flex items-center">🔒 介護者モードへの切替</h3>
-            <p class="text-sm font-bold text-slate-600">誤操作を防ぐため、簡単な計算に答えてください。</p>
-            <div class="bg-slate-100 p-4 rounded-2xl text-center">
-                <span id="auth-question" class="text-2xl font-black">5 + 3 = ?</span>
-            </div>
-            <input type="number" id="auth-answer" placeholder="答えを入力" class="w-full p-3 border rounded-xl text-center text-2xl font-black">
+            <h3 class="text-2xl font-black flex items-center">🔒 家族モードへの切替</h3>
+            <p class="text-sm font-bold text-slate-600">暗証番号を入力してください。（初期設定: 1234）</p>
+            <input type="password" id="auth-answer" placeholder="暗証番号を入力" class="w-full p-3 border rounded-xl text-center text-2xl font-black">
             <div class="flex space-x-2">
                 <button onclick="closeModeSwitchModal()" class="w-1/2 bg-slate-200 font-bold py-3 rounded-xl">キャンセル</button>
                 <button onclick="verifyModeSwitch()" class="w-1/2 bg-blue-700 text-white font-bold py-3 rounded-xl shadow">切替</button>
@@ -534,13 +545,13 @@
     <script>
         let speechEnabled = true;
         let isCaregiverMode = false;
-        let authAnswerValue = 8;
         let waterCount = 0;
         let healthStatus = '';
         let galleryPhotoIndex = 0;
         let galleryBase64Temp = '';
 
         let appData = {
+            caregiverPassword: 1234,
             exerciseTargets: { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 },
             exerciseDone: { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 },
             messages: [
@@ -579,6 +590,7 @@
                 try {
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
+                    if (!appData.caregiverPassword) appData.caregiverPassword = 1234;
                     if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 };
                     if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 };
                     if (!appData.contacts) appData.contacts = [];
@@ -648,6 +660,9 @@
             renderStamps();
             renderMessages();
             renderExerciseProgress();
+            
+            const pwdInput = document.getElementById('input-caregiver-password');
+            if (pwdInput) pwdInput.value = appData.caregiverPassword || 1234;
         }
 
         function toggleSpeech() {
@@ -891,6 +906,16 @@
             appData.exerciseDone[type] = (appData.exerciseDone[type] || 0) + 1;
             saveData();
             renderExerciseProgress();
+        }
+
+        function handleUpdatePassword(e) {
+            e.preventDefault();
+            const val = parseInt(document.getElementById('input-caregiver-password').value);
+            if (!isNaN(val)) {
+                appData.caregiverPassword = val;
+                saveData();
+                alert("暗証番号を変更・保存しました！");
+            }
         }
 
         function handleUpdateExerciseTargets(e) {
@@ -1334,12 +1359,9 @@
                 switchToElderlyMode();
                 return;
             }
-            authAnswerValue = 8;
-            const qEl = document.getElementById('auth-question');
             const aEl = document.getElementById('auth-answer');
             const modalEl = document.getElementById('mode-modal');
             
-            if (qEl) qEl.innerText = "5 + 3 = ?";
             if (aEl) aEl.value = '';
             if (modalEl) modalEl.classList.remove('hidden');
         }
@@ -1353,11 +1375,13 @@
             const aEl = document.getElementById('auth-answer');
             if (!aEl) return;
             const ans = parseInt(aEl.value);
-            if (ans === authAnswerValue) {
+            const targetPwd = appData.caregiverPassword || 1234;
+            
+            if (ans === targetPwd) {
                 closeModeSwitchModal();
                 switchToCaregiverMode();
             } else {
-                alert("答えが違います。");
+                alert("暗証番号が違います。");
             }
         }
 
