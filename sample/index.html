@@ -279,7 +279,7 @@
                     <div id="game-cogni-container" class="w-full text-center space-y-4">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🦶 足踏み体操</span>
-                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="cogni-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="cogni-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                            <span class="font-bold text-sm text-purple-800">本日達成: <span id="cogni-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="cogni-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
                         
                         <div class="flex items-center justify-center space-x-2 bg-slate-100 p-2 rounded-2xl">
@@ -315,7 +315,7 @@
                     <div id="game-hands-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🖐️ 左右別々 グーチョキパー</span>
-                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="hands-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="hands-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                            <span class="font-bold text-sm text-purple-800">本日達成: <span id="hands-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="hands-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
                         <div class="bg-purple-100 p-3 rounded-2xl border border-purple-300 font-bold text-slate-800 text-sm md:text-base">
                             💡 右手と左手でちがう形をつくります。指示に合わせて手を出しましょう！
@@ -331,30 +331,30 @@
                             </div>
                         </div>
                         <button onclick="nextHandsRound()" class="bg-purple-700 hover:bg-purple-800 text-white font-black px-8 py-3.5 rounded-2xl text-xl shadow-lg border-2 border-purple-900">
-                            できた！つぎのお題 ➔
+                            できた！達成カウント＆次のお題 ➔
                         </button>
                     </div>
 
-                    <!-- 3. 口の体操（マイク音声認識・ひらがな/カタカナ全対応） -->
+                    <!-- 3. 口の体操（マイク音声認識強化・手動達成ボタン併設） -->
                     <div id="game-patakara-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🗣️ 口の体操（マイク音声対応）</span>
-                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="patakara-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="patakara-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                            <span class="font-bold text-sm text-purple-800">本日達成: <span id="patakara-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="patakara-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
                         <div class="bg-blue-50 p-3 rounded-2xl border border-blue-200 font-bold text-slate-800 text-sm">
-                            💡 マイクボタンを押して、画面の文字（パ・タ・カ・ラ）を声に出してみましょう！
+                            💡 マイクボタンを押して発声するか、「声でOK」ボタンでクリアできます！
                         </div>
                         <div id="patakara-char-display" class="text-7xl font-black text-blue-900 py-3 bg-blue-100 rounded-3xl border-2 border-blue-300 max-w-xs mx-auto shadow-inner">
                             パ
                         </div>
                         <div id="speech-recognized-text" class="text-sm font-bold text-slate-500 min-h-[20px]">音声聞き取り待機中...</div>
                         
-                        <div class="flex items-center justify-center space-x-3">
+                        <div class="flex flex-wrap items-center justify-center gap-3">
                             <button id="mic-start-btn" onclick="toggleVoiceRecognition()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-3.5 rounded-2xl text-lg shadow-lg border-2 border-emerald-900 flex items-center space-x-2">
-                                <i class="fas fa-microphone text-xl"></i><span id="mic-btn-label">声でこたえる（マイクON）</span>
+                                <i class="fas fa-microphone text-xl"></i><span id="mic-btn-label">マイクONで答える</span>
                             </button>
-                            <button onclick="nextPatakaraStep(true)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-3.5 rounded-2xl text-sm border">
-                                ボタンで進む
+                            <button onclick="nextPatakaraStep(true)" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-3.5 rounded-2xl text-lg border-2 border-amber-700 shadow-lg">
+                                声でOK（つぎへ）
                             </button>
                         </div>
                     </div>
@@ -363,7 +363,7 @@
                     <div id="game-janken-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">✊ 後出しじゃんけん</span>
-                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="janken-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="janken-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                            <span class="font-bold text-sm text-purple-800">本日達成: <span id="janken-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="janken-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
                         <div id="janken-target-card" class="bg-yellow-100 border-4 border-yellow-500 rounded-3xl p-4 inline-block shadow-md">
                             <div id="janken-rule-label" class="text-lg font-extrabold text-red-600 mb-1">👈 勝ってください！</div>
@@ -381,7 +381,7 @@
                     <div id="game-numbers-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🧠 数字タッチ</span>
-                            <span class="font-bold text-sm text-purple-800">ノルマ達成: <span id="numbers-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="numbers-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
+                            <span class="font-bold text-sm text-purple-800">本日達成: <span id="numbers-current-done" class="text-lg font-black text-purple-950">0</span> / <span id="numbers-target-val" class="text-lg font-black text-purple-950">1</span> 回</span>
                         </div>
                         <div class="text-xl font-black">「<span id="target-number" class="text-3xl text-red-600">1</span>」を押してください！</div>
                         <div id="numbers-grid" class="grid grid-cols-3 gap-3 max-w-xs mx-auto"></div>
@@ -551,6 +551,7 @@
         let galleryBase64Temp = '';
 
         let appData = {
+            lastDateStr: '', // 日付リセット用
             caregiverPassword: 1234,
             exerciseTargets: { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 },
             exerciseDone: { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 },
@@ -573,6 +574,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadLocalStorageData();
+            checkAndResetDailyData(); // 日付自動リセット判定
             updateClock();
             setInterval(updateClock, 1000);
             renderAll();
@@ -599,7 +601,32 @@
             }
         }
 
+        /* 24時（日付切り替え）での自動リセットチェック */
+        function checkAndResetDailyData() {
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+            
+            if (appData.lastDateStr && appData.lastDateStr !== todayStr) {
+                // 日付が変わったため日課記録をリセット
+                appData.exerciseDone = { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 };
+                appData.schedules.forEach(s => s.done = false);
+                waterCount = 0;
+                healthStatus = '';
+                
+                const badge = document.getElementById('health-status-badge');
+                if (badge) {
+                    badge.innerText = '未選択';
+                    badge.className = "text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg";
+                }
+                const waterDisp = document.getElementById('water-count-display');
+                if (waterDisp) waterDisp.innerText = '0';
+            }
+            appData.lastDateStr = todayStr;
+            saveData();
+        }
+
         function updateClock() {
+            checkAndResetDailyData(); // 日付変更チェック
             const now = new Date();
             const days = ['日', '月', '火', '水', '木', '金', '土'];
             
@@ -941,7 +968,7 @@
             document.getElementById(`game-${game}-container`).classList.remove('hidden');
             document.getElementById(`game-select-${game}`).className = "py-3 bg-purple-700 text-white rounded-2xl font-bold text-sm md:text-base border-2 border-purple-900 shadow";
             
-            if (game === 'hands') nextHandsRound();
+            if (game === 'hands') nextHandsRound(false);
             if (game === 'patakara') initPatakaraGame();
         }
 
@@ -983,7 +1010,7 @@
                         cogniTimer = null;
                         cogniCount = 1;
                         if (playText) playText.innerText = "体操スタート";
-                        incrementExerciseDone('cogni');
+                        incrementExerciseDone('cogni'); // 加算処理
                         speakText("お疲れ様でした！足踏み体操達成です！");
                         if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
                     }
@@ -995,25 +1022,29 @@
         /* 2. グーチョキパー（左右手あそび） */
         const handIcons = ['✊', '✌️', '✋'];
         
-        function nextHandsRound() {
+        function nextHandsRound(addCount = true) {
             const rightHand = handIcons[Math.floor(Math.random() * 3)];
             let leftHand = handIcons[Math.floor(Math.random() * 3)];
             
             document.getElementById('hands-right-icon').innerText = rightHand;
             document.getElementById('hands-left-icon').innerText = leftHand;
             
-            speakText("右手と左手、指示通りに形をつくりましょう！");
-            incrementExerciseDone('hands');
-            if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 40 });
+            if (addCount) {
+                incrementExerciseDone('hands'); // 加算処理
+                speakText("達成です！つぎのお題です！");
+                if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 40 });
+            } else {
+                speakText("右手と左手、指示通りに形をつくりましょう！");
+            }
         }
 
-        /* 3. 口の体操（ひらがな・カタカナ両対応の表記揺れ吸収型ロジック） */
+        /* 3. 口の体操（音声認識判定強化） */
         const patakaraChars = ['パ', 'タ', 'カ', 'ラ'];
         const patakaraMatchMap = {
-            'パ': ['パ', 'ぱ', 'パー', 'ぱー', 'pa'],
-            'タ': ['タ', 'た', 'ター', 'たー', 'ta'],
-            'カ': ['カ', 'か', 'カー', 'かー', 'ka'],
-            'ラ': ['ラ', 'ら', 'ラー', 'らー', 'ra']
+            'パ': ['パ', 'ぱ', 'パー', 'ぱー', 'pa', 'ば', 'バ'],
+            'タ': ['タ', 'た', 'ター', 'たー', 'ta', 'だ', 'ダ'],
+            'カ': ['カ', 'か', 'カー', 'かー', 'ka', 'が', 'ガ'],
+            'ラ': ['ラ', 'ら', 'ラー', 'らー', 'ra', 'な', 'ナ']
         };
 
         let patakaraIndex = 0;
@@ -1031,7 +1062,7 @@
         function setupSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                document.getElementById('speech-recognized-text').innerText = "※お使いのブラウザは音声認識非対応です（ボタン操作をご利用ください）";
+                document.getElementById('speech-recognized-text').innerText = "※お使いのブラウザは音声認識非対応です（「声でOK」ボタンをご利用ください）";
                 return;
             }
 
@@ -1061,26 +1092,26 @@
             };
 
             recognition.onerror = () => {
-                document.getElementById('speech-recognized-text').innerText = "マイクの聞き取りでエラーが発生しました";
+                document.getElementById('speech-recognized-text').innerText = "マイクの聞き取り待機中...";
             };
         }
 
         function toggleVoiceRecognition() {
             if (!recognition) {
-                alert("お使いの端末・ブラウザはマイクでの音声認識に対応していません。「ボタンで進む」をお使いください。");
+                alert("お使いの端末・ブラウザはマイクでの音声認識に対応していません。「声でOK」ボタンをお使いください。");
                 return;
             }
 
             if (isListening) {
                 recognition.stop();
                 isListening = false;
-                document.getElementById('mic-btn-label').innerText = "声でこたえる（マイクON）";
+                document.getElementById('mic-btn-label').innerText = "マイクONで答える";
                 document.getElementById('mic-start-btn').className = "bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-3.5 rounded-2xl text-lg shadow-lg border-2 border-emerald-900 flex items-center space-x-2";
             } else {
                 try {
                     recognition.start();
                     isListening = true;
-                    document.getElementById('mic-btn-label').innerText = "聞き取り中...（マイクOFF）";
+                    document.getElementById('mic-btn-label').innerText = "聞き取り中...（タップで止める）";
                     document.getElementById('mic-start-btn').className = "bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3.5 rounded-2xl text-lg shadow-lg border-2 border-red-900 flex items-center space-x-2 animate-pulse";
                 } catch(e) {}
             }
@@ -1091,10 +1122,10 @@
             if (patakaraIndex < patakaraChars.length) {
                 const char = patakaraChars[patakaraIndex];
                 document.getElementById('patakara-char-display').innerText = char;
-                if (isManual) speakText(`つぎは「${char}」です`);
+                speakText(`つぎは「${char}」です`);
             } else {
                 speakText("お見事！口の体操クリアです！");
-                incrementExerciseDone('patakara');
+                incrementExerciseDone('patakara'); // 加算処理
                 if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
                 if (isListening) toggleVoiceRecognition();
                 setTimeout(initPatakaraGame, 1000);
@@ -1114,7 +1145,7 @@
         function checkJankenAnswer(userHand) {
             document.getElementById('janken-result-msg').innerText = "⭕ 大正解！";
             speakText("大正解！");
-            incrementExerciseDone('janken');
+            incrementExerciseDone('janken'); // 加算処理
             if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 50 });
             setTimeout(nextJankenRound, 1500);
         }
@@ -1144,7 +1175,7 @@
                 currentTargetNum++;
                 if (currentTargetNum > 6) {
                     speakText("パーフェクト！");
-                    incrementExerciseDone('numbers');
+                    incrementExerciseDone('numbers'); // 加算処理
                     if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
                     setTimeout(initNumbersGame, 1500);
                 } else {
