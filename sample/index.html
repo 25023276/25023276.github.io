@@ -59,6 +59,12 @@
 </head>
 <body id="app-body" class="time-morning min-h-screen flex flex-col justify-between selection:bg-yellow-200">
 
+    <!-- アプリ内ブラウザ警告バナー -->
+    <div id="in-app-browser-banner" class="hidden bg-amber-500 text-slate-950 px-4 py-3 text-sm md:text-base font-black text-center border-b-2 border-amber-700 shadow-md">
+        <i class="fas fa-exclamation-triangle mr-1"></i>
+        データを確実に保存するため、右上のメニューから「Safariで開く」または「Chromeで開く」を選択してください。
+    </div>
+
     <!-- ヘッダーエリア -->
     <header class="bg-blue-900 text-white p-3 md:p-4 shadow-lg sticky top-0 z-40">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
@@ -67,17 +73,19 @@
                 <!-- 時間帯バッジ表示 -->
                 <div id="time-period-badge" class="bg-yellow-400 text-blue-950 px-3 py-2 rounded-2xl font-black flex flex-col items-center justify-center border-2 border-yellow-200 shadow">
                     <span id="time-period-icon" class="text-2xl md:text-3xl">🌅</span>
-                    <span id="time-period-text" class="text-sm md:text-base tracking-wider font-extrabold">あさ</span>
+                    <span id="time-period-text" class="text-xs md:text-sm tracking-wider font-extrabold">あさ</span>
                 </div>
 
+                <!-- 西暦と日付を上下2段に分けて表示 -->
                 <div class="flex flex-col">
-                    <span id="date-display" class="text-base md:text-2xl font-extrabold text-yellow-300">----年--月--日(-)</span>
-                    <span id="time-display" class="text-3xl md:text-4xl font-black tracking-wider text-white leading-none">00:00</span>
+                    <span id="year-display" class="text-xs md:text-sm font-bold text-yellow-200 leading-tight">----年</span>
+                    <span id="date-display" class="text-base md:text-xl font-extrabold text-yellow-300 leading-tight">--月--日(-)</span>
+                    <span id="time-display" class="text-3xl md:text-4xl font-black tracking-wider text-white leading-none mt-0.5">00:00</span>
                 </div>
             </div>
 
             <div class="flex items-center space-x-2 md:space-x-4">
-                <button id="tts-toggle-btn" onclick="toggleSpeech()" class="bg-yellow-400 hover:bg-yellow-300 text-blue-950 px-3 py-2 rounded-2xl font-bold flex items-center space-x-1 shadow border-2 border-yellow-200 text-sm md:text-base">
+                <button id="tts-toggle-btn" onclick="toggleSpeech()" class="bg-yellow-400 hover:bg-yellow-300 text-blue-950 px-3 py-2 rounded-2xl font-bold flex items-center space-x-1 shadow border-2 border-yellow-200 text-xs md:text-base">
                     <i id="tts-icon" class="fas fa-volume-up text-lg md:text-xl"></i>
                     <span id="tts-status">よみあげ: オン</span>
                 </button>
@@ -136,7 +144,7 @@
                         <span class="text-2xl">💬</span>
                         <span id="photo-caption-text" class="text-lg md:text-xl font-black text-slate-800">写真を登録してください</span>
                     </div>
-                    <button onclick="speakPhotoCaption()" class="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl font-bold text-sm shadow">
+                    <button onclick="speakPhotoCaption()" class="bg-rose-500 hover:bg-rose-600 text-white p-2.5 rounded-xl font-bold text-sm shadow flex-shrink-0">
                         <i class="fas fa-volume-up text-lg mr-1"></i>よむ
                     </button>
                 </div>
@@ -164,41 +172,52 @@
 
             <!-- 体調＆水分 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white border-4 border-emerald-600 rounded-3xl p-4 shadow-md space-y-2">
+                <!-- 心身の体調チェック -->
+                <div class="bg-white border-4 border-emerald-600 rounded-3xl p-4 shadow-md space-y-2 text-slate-900">
                     <div class="flex justify-between items-center border-b-2 border-emerald-100 pb-2">
                         <span class="text-lg font-black text-emerald-950 flex items-center">
-                            <i class="fas fa-smile text-emerald-600 mr-2 text-2xl"></i>きょうの体調はいかが？
+                            <i class="fas fa-smile text-emerald-600 mr-2 text-2xl"></i>きょうの体調・気分は？
                         </span>
                         <span id="health-status-badge" class="text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg">未選択</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 pt-1">
-                        <button onclick="recordHealth('genki')" class="py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-extrabold rounded-2xl border-2 border-emerald-400 flex flex-col items-center">
-                            <span class="text-3xl">😊</span><span class="text-sm mt-1">元気！</span>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="recordHealth('元気！')" class="py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-extrabold rounded-2xl border-2 border-emerald-400 flex items-center justify-center space-x-2">
+                            <span class="text-2xl">😊</span><span class="text-base">元気！</span>
                         </button>
-                        <button onclick="recordHealth('futsuu')" class="py-3 bg-blue-50 hover:bg-blue-100 text-blue-950 font-extrabold rounded-2xl border-2 border-blue-400 flex flex-col items-center">
-                            <span class="text-3xl">🙂</span><span class="text-sm mt-1">ふつう</span>
+                        <button onclick="recordHealth('ふつう')" class="py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-950 font-extrabold rounded-2xl border-2 border-blue-400 flex items-center justify-center space-x-2">
+                            <span class="text-2xl">🙂</span><span class="text-base">ふつう</span>
                         </button>
-                        <button onclick="recordHealth('darui')" class="py-3 bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold rounded-2xl border-2 border-amber-400 flex flex-col items-center">
-                            <span class="text-3xl">🥺</span><span class="text-sm mt-1">だるい</span>
+                        <button onclick="recordHealth('だるい・よくない')" class="py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold rounded-2xl border-2 border-amber-400 flex items-center justify-center space-x-2">
+                            <span class="text-2xl">🥺</span><span class="text-sm">だるい・よくない</span>
+                        </button>
+                        <button onclick="recordHealth('気分が晴れない')" class="py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 font-extrabold rounded-2xl border-2 border-purple-400 flex items-center justify-center space-x-2">
+                            <span class="text-2xl">☁️</span><span class="text-sm">気分が晴れない</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-sky-50 border-4 border-sky-500 rounded-3xl p-4 shadow-md space-y-2 flex flex-col justify-between">
+                <!-- 水分補給（1杯もどすボタン付き） -->
+                <div class="bg-sky-50 border-4 border-sky-500 rounded-3xl p-4 shadow-md space-y-2 flex flex-col justify-between text-slate-900">
                     <div class="flex justify-between items-center border-b-2 border-sky-200 pb-1">
                         <span class="text-lg font-black text-sky-950 flex items-center">
                             <i class="fas fa-glass-water text-sky-600 mr-2 text-2xl"></i>きょうのお水（水分補給）
                         </span>
                         <span class="text-xs font-bold text-sky-700 bg-sky-200 px-2 py-1 rounded-lg">目標 5杯</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
+                    <div class="flex items-center justify-between pt-1">
+                        <div class="flex items-baseline space-x-1">
                             <span id="water-count-display" class="text-4xl font-black text-sky-900">0</span>
-                            <span class="text-lg font-bold text-sky-800">杯 のんだよ🥤</span>
+                            <span class="text-base md:text-lg font-bold text-sky-800">杯 のんだよ🥤</span>
                         </div>
-                        <button onclick="addWaterGlass()" class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-black px-4 py-3 rounded-2xl text-lg border-2 border-sky-800 shadow flex items-center space-x-1">
-                            <i class="fas fa-plus text-xl"></i><span>1杯のんだ！</span>
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="removeWaterGlass()" title="間違えたときに1杯減らします" class="bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-800 font-black px-3 py-3 rounded-2xl text-sm border-2 border-slate-400 shadow flex flex-col items-center justify-center leading-tight">
+                                <span>－1杯</span>
+                                <span class="text-[10px]">もどす</span>
+                            </button>
+                            <button onclick="addWaterGlass()" class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-black px-4 py-3 rounded-2xl text-base md:text-lg border-2 border-sky-800 shadow flex items-center space-x-1">
+                                <i class="fas fa-plus text-lg"></i><span>1杯のんだ！</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -285,8 +304,8 @@
                         <div class="flex items-center justify-center space-x-2 bg-slate-100 p-2 rounded-2xl">
                             <span class="text-sm font-bold text-slate-700 mr-1"><i class="fas fa-tachometer-alt mr-1"></i>はやさ:</span>
                             <button id="speed-btn-slow" onclick="setCogniSpeed(1500, 'slow')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-800 border shadow-sm">🐢 ゆっくり</button>
-                            <button id="speed-btn-normal" onclick="setCogniSpeed(1000, 'normal')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-700 text-white shadow-sm">🚶 ふつう</button>
-                            <button id="speed-btn-fast" onclick="setCogniSpeed(600, 'fast')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-800 border shadow-sm">🐇 はやめ</button>
+                            <button id="speed-btn-normal" onclick="setCogniSpeed(1200, 'normal')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-700 text-white shadow-sm">🚶 ふつう</button>
+                            <button id="speed-btn-fast" onclick="setCogniSpeed(850, 'fast')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-white text-slate-800 border shadow-sm">🐇 すこしはやめ</button>
                         </div>
 
                         <div class="bg-amber-100 p-3 rounded-2xl border border-amber-300 font-bold text-sm md:text-base">
@@ -335,7 +354,7 @@
                         </button>
                     </div>
 
-                    <!-- 3. 口の体操（マイク音声認識強化・手動達成ボタン併設） -->
+                    <!-- 3. 口の体操 -->
                     <div id="game-patakara-container" class="w-full text-center space-y-4 hidden">
                         <div class="flex justify-between items-center bg-purple-50 p-3 rounded-2xl border border-purple-200">
                             <span class="font-extrabold text-purple-900">🗣️ 口の体操（マイク音声対応）</span>
@@ -406,7 +425,32 @@
                 </button>
             </div>
 
-            <!-- 暗証番号（パスワード）設定フォーム -->
+            <!-- 予定の完了時刻・押下回数履歴（介護者確認用） -->
+            <div class="bg-white p-6 rounded-3xl border-4 border-blue-600 shadow-md space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="text-xl font-black text-blue-950 flex items-center">
+                        <i class="fas fa-history text-blue-600 mr-2"></i>📋 本日の予定・お薬「完了時刻と押された回数」記録
+                    </h3>
+                    <span class="text-xs font-bold bg-blue-100 text-blue-900 px-2 py-1 rounded">二重飲み・確認回数チェック</span>
+                </div>
+                <p class="text-xs font-bold text-slate-600">本人が何時に「できた！」を押したか、また完了後に何度も確認して押していないかを確認できます。</p>
+                <div id="caregiver-schedule-list" class="space-y-2"></div>
+            </div>
+
+            <!-- 本日の水分補給履歴（介護者確認用） -->
+            <div class="bg-white p-6 rounded-3xl border-4 border-sky-500 shadow-md space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="text-xl font-black text-sky-950 flex items-center">
+                        <i class="fas fa-glass-water text-sky-600 mr-2"></i>💧 本日の水分補給「飲んだ時刻」記録
+                    </h3>
+                    <span id="caregiver-water-total" class="text-sm font-black bg-sky-100 text-sky-900 px-3 py-1 rounded-lg">合計 0 杯</span>
+                </div>
+                <div id="caregiver-water-logs" class="text-sm font-bold text-slate-700 bg-sky-50 p-3 rounded-xl border border-sky-200">
+                    まだ記録がありません
+                </div>
+            </div>
+
+            <!-- 暗証番号設定フォーム -->
             <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
                 <h3 class="text-xl font-bold border-b pb-2 flex items-center">
                     <i class="fas fa-key text-yellow-600 mr-2"></i>🔒 モード切替の暗証番号（パスワード）設定
@@ -453,7 +497,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 写真追加 -->
+                <!-- 写真追加（自動圧縮対応） -->
                 <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-4">
                     <h3 class="text-xl font-bold border-b pb-2">📸 写真アルバムの追加</h3>
                     <form onsubmit="handleAddGalleryPhoto(event)" class="space-y-3">
@@ -518,12 +562,6 @@
                 </div>
                 <div id="caregiver-message-list" class="space-y-2 pt-2"></div>
             </div>
-
-            <!-- 予定管理 -->
-            <div class="bg-white p-6 rounded-3xl border-2 border-slate-300 shadow-md space-y-3">
-                <h3 class="text-xl font-bold border-b pb-2">📋 登録済み予定の管理</h3>
-                <div id="caregiver-schedule-list" class="space-y-2"></div>
-            </div>
         </div>
 
     </main>
@@ -545,24 +583,25 @@
     <script>
         let speechEnabled = true;
         let isCaregiverMode = false;
-        let waterCount = 0;
-        let healthStatus = '';
         let galleryPhotoIndex = 0;
         let galleryBase64Temp = '';
 
         let appData = {
-            lastDateStr: '', // 日付リセット用
+            lastDateStr: '',
             caregiverPassword: 1234,
+            waterCount: 0,
+            waterLogs: [],
+            healthStatus: '',
             exerciseTargets: { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 },
             exerciseDone: { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 },
             messages: [
                 { id: 1, text: "きょうも元気にご飯をたべて、お散歩にいこうね！" }
             ],
             schedules: [
-                { id: 1, category: "薬", time: "08:00", title: "あさの食後薬をのむ", done: false },
-                { id: 2, category: "体操", time: "10:30", title: "すわって足踏み運動", done: false },
-                { id: 3, category: "食事", time: "12:00", title: "お昼ごはん", done: false },
-                { id: 4, category: "薬", time: "18:00", title: "ばんの食後薬をのむ", done: false }
+                { id: 1, category: "薬", time: "08:00", title: "あさの食後薬をのむ", done: false, completedAt: null, pressLogs: [] },
+                { id: 2, category: "体操", time: "10:30", title: "すわって足踏み運動", done: false, completedAt: null, pressLogs: [] },
+                { id: 3, category: "食事", time: "12:00", title: "お昼ごはん", done: false, completedAt: null, pressLogs: [] },
+                { id: 4, category: "薬", time: "18:00", title: "ばんの食後薬をのむ", done: false, completedAt: null, pressLogs: [] }
             ],
             contacts: [
                 { id: 1, name: "長女（花子）", phone: "090-1234-5678", icon: "👩", role: "長女" },
@@ -573,8 +612,9 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => {
+            checkInAppBrowser();
             loadLocalStorageData();
-            checkAndResetDailyData(); // 日付自動リセット判定
+            checkAndResetDailyData();
             updateClock();
             setInterval(updateClock, 1000);
             renderAll();
@@ -582,8 +622,21 @@
             nextJankenRound();
         });
 
+        /* LINEやQRコード簡易ブラウザの判定 */
+        function checkInAppBrowser() {
+            const ua = navigator.userAgent.toLowerCase();
+            if (ua.includes('line') || ua.includes('instagram') || ua.includes('fban') || ua.includes('fbav')) {
+                const banner = document.getElementById('in-app-browser-banner');
+                if (banner) banner.classList.remove('hidden');
+            }
+        }
+
         function saveData() {
-            localStorage.setItem('elderly_support_app_data', JSON.stringify(appData));
+            try {
+                localStorage.setItem('elderly_support_app_data', JSON.stringify(appData));
+            } catch (e) {
+                alert("端末の保存容量がいっぱいです。不要な写真を削除してください。");
+            }
         }
 
         function loadLocalStorageData() {
@@ -593,10 +646,16 @@
                     const parsed = JSON.parse(saved);
                     appData = { ...appData, ...parsed };
                     if (!appData.caregiverPassword) appData.caregiverPassword = 1234;
+                    if (typeof appData.waterCount !== 'number') appData.waterCount = 0;
+                    if (!Array.isArray(appData.waterLogs)) appData.waterLogs = [];
+                    if (!appData.healthStatus) appData.healthStatus = '';
                     if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 };
                     if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 };
                     if (!appData.contacts) appData.contacts = [];
                     if (!appData.schedules) appData.schedules = [];
+                    appData.schedules.forEach(s => {
+                        if (!Array.isArray(s.pressLogs)) s.pressLogs = [];
+                    });
                 } catch(e) {}
             }
         }
@@ -607,32 +666,30 @@
             const todayStr = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
             
             if (appData.lastDateStr && appData.lastDateStr !== todayStr) {
-                // 日付が変わったため日課記録をリセット
                 appData.exerciseDone = { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 };
-                appData.schedules.forEach(s => s.done = false);
-                waterCount = 0;
-                healthStatus = '';
-                
-                const badge = document.getElementById('health-status-badge');
-                if (badge) {
-                    badge.innerText = '未選択';
-                    badge.className = "text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg";
-                }
-                const waterDisp = document.getElementById('water-count-display');
-                if (waterDisp) waterDisp.innerText = '0';
+                appData.schedules.forEach(s => {
+                    s.done = false;
+                    s.completedAt = null;
+                    s.pressLogs = [];
+                });
+                appData.waterCount = 0;
+                appData.waterLogs = [];
+                appData.healthStatus = '';
             }
             appData.lastDateStr = todayStr;
             saveData();
         }
 
         function updateClock() {
-            checkAndResetDailyData(); // 日付変更チェック
+            checkAndResetDailyData();
             const now = new Date();
             const days = ['日', '月', '火', '水', '木', '金', '土'];
             
+            const yearEl = document.getElementById('year-display');
             const dateEl = document.getElementById('date-display');
             const timeEl = document.getElementById('time-display');
-            if (dateEl) dateEl.innerText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日(${days[now.getDay()]})`;
+            if (yearEl) yearEl.innerText = `${now.getFullYear()}年`;
+            if (dateEl) dateEl.innerText = `${now.getMonth()+1}月${now.getDate()}日(${days[now.getDay()]})`;
             if (timeEl) timeEl.innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
             const h = now.getHours();
@@ -682,6 +739,7 @@
 
         function renderAll() {
             renderSchedule();
+            renderWaterAndHealth();
             renderContacts();
             renderGallery();
             renderStamps();
@@ -690,6 +748,36 @@
             
             const pwdInput = document.getElementById('input-caregiver-password');
             if (pwdInput) pwdInput.value = appData.caregiverPassword || 1234;
+        }
+
+        function renderWaterAndHealth() {
+            const waterDisp = document.getElementById('water-count-display');
+            if (waterDisp) waterDisp.innerText = appData.waterCount || 0;
+
+            const caregiverTotal = document.getElementById('caregiver-water-total');
+            if (caregiverTotal) caregiverTotal.innerText = `合計 ${appData.waterCount || 0} 杯`;
+
+            const caregiverLogs = document.getElementById('caregiver-water-logs');
+            if (caregiverLogs) {
+                if (appData.waterLogs && appData.waterLogs.length > 0) {
+                    caregiverLogs.innerHTML = appData.waterLogs
+                        .map((t, idx) => `<span class="inline-block bg-white border border-sky-300 px-2.5 py-1 rounded-lg mr-2 mb-1">${idx + 1}杯目: <strong>${t}</strong></span>`)
+                        .join('');
+                } else {
+                    caregiverLogs.innerText = "まだ記録がありません";
+                }
+            }
+
+            const badge = document.getElementById('health-status-badge');
+            if (badge) {
+                if (appData.healthStatus) {
+                    badge.innerText = appData.healthStatus;
+                    badge.className = "text-xs font-bold px-2 py-1 bg-emerald-600 text-white rounded-lg";
+                } else {
+                    badge.innerText = "未選択";
+                    badge.className = "text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg";
+                }
+            }
         }
 
         function toggleSpeech() {
@@ -714,8 +802,8 @@
             grid.innerHTML = '';
 
             const completedSchedulesCount = appData.schedules.filter(s => s.done).length;
-            const healthDone = healthStatus ? 1 : 0;
-            const waterDone = waterCount >= 5 ? 1 : 0;
+            const healthDone = appData.healthStatus ? 1 : 0;
+            const waterDone = (appData.waterCount || 0) >= 5 ? 1 : 0;
 
             const totalEarnedStamps = completedSchedulesCount + healthDone + waterDone;
             const totalStampSlots = appData.schedules.length + 2;
@@ -743,33 +831,53 @@
 
             appData.schedules.forEach((item) => {
                 if (item.done) completedCount++;
+                const logs = Array.isArray(item.pressLogs) ? item.pressLogs : [];
+                const completedTimeBadge = item.done && item.completedAt 
+                    ? `<span class="inline-block mt-1 bg-emerald-600 text-white text-sm md:text-base font-black px-3 py-0.5 rounded-lg shadow-sm">✅ ${item.completedAt} 完了</span>` 
+                    : '';
 
                 if (container) {
                     const card = document.createElement('div');
                     card.className = `p-4 rounded-3xl border-4 flex items-center justify-between shadow-md ${
-                        item.done ? 'bg-slate-100 border-slate-300 opacity-60' : 'bg-white border-blue-500'
+                        item.done ? 'bg-slate-200 border-slate-400' : 'bg-white border-blue-500'
                     }`;
                     card.innerHTML = `
-                        <div class="flex items-center space-x-4">
-                            <div class="text-2xl font-black bg-blue-100 text-blue-900 px-3 py-2 rounded-2xl border border-blue-300">${item.time}</div>
+                        <div class="flex items-center space-x-3 md:space-x-4">
+                            <div class="text-xl md:text-2xl font-black ${item.done ? 'bg-slate-300 text-slate-600 border-slate-400' : 'bg-blue-100 text-blue-900 border-blue-300'} px-3 py-2 rounded-2xl border">${item.time}</div>
                             <div>
-                                <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-200 text-blue-900">${item.category}</span>
-                                <div class="text-xl md:text-2xl font-black ${item.done ? 'line-through text-slate-500' : 'text-slate-900'}">${item.title}</div>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded ${item.done ? 'bg-slate-300 text-slate-600' : 'bg-blue-200 text-blue-900'}">${item.category}</span>
+                                <div class="text-xl md:text-2xl font-black ${item.done ? 'text-slate-600' : 'text-slate-900'}">${item.title}</div>
+                                ${completedTimeBadge}
                             </div>
                         </div>
-                        <button onclick="toggleScheduleDone(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow ${
-                            item.done ? 'bg-slate-300 text-slate-700' : 'bg-emerald-600 text-white'
-                        }">できた！</button>
+                        <button onclick="recordSchedulePress(${item.id})" class="px-5 py-3 rounded-2xl font-black text-lg border-2 shadow flex-shrink-0 ${
+                            item.done ? 'bg-slate-400 text-white border-slate-500' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-800'
+                        }">${item.done ? '完了済' : 'できた！'}</button>
                     `;
                     container.appendChild(card);
                 }
 
                 if (caregiverContainer) {
+                    const pressCount = logs.length;
+                    const logDetail = pressCount > 0 
+                        ? `<span class="text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded text-xs font-black">完了: ${item.completedAt}（計 ${pressCount}回押下 / 履歴: ${logs.join(', ')}）</span>`
+                        : `<span class="text-slate-500 bg-slate-200 px-2 py-0.5 rounded text-xs font-bold">未完了（0回）</span>`;
+                    
+                    const alertBadge = pressCount >= 2 
+                        ? `<span class="ml-1 bg-amber-500 text-slate-950 text-xs font-black px-2 py-0.5 rounded">⚠️ 複数回押下あり</span>` 
+                        : '';
+
                     const cCard = document.createElement('div');
-                    cCard.className = "flex justify-between items-center bg-slate-100 p-3 rounded-xl font-bold border";
+                    cCard.className = "flex flex-col md:flex-row md:justify-between md:items-center bg-slate-50 p-3 rounded-xl font-bold border border-slate-300 gap-2";
                     cCard.innerHTML = `
-                        <span>[${item.time}] (${item.category}) ${item.title}</span>
-                        <button onclick="deleteSchedule(${item.id})" class="bg-red-500 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
+                        <div class="space-y-1">
+                            <div class="text-base">[${item.time}] (${item.category}) ${item.title}</div>
+                            <div class="flex flex-wrap items-center gap-1">${logDetail}${alertBadge}</div>
+                        </div>
+                        <div class="flex items-center space-x-2 self-end md:self-center">
+                            <button onclick="resetSingleSchedule(${item.id})" class="bg-slate-500 hover:bg-slate-600 text-white text-xs px-3 py-1.5 rounded-lg">未完了に戻す</button>
+                            <button onclick="deleteSchedule(${item.id})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg">削除</button>
+                        </div>
                     `;
                     caregiverContainer.appendChild(cCard);
                 }
@@ -780,14 +888,35 @@
             renderStamps();
         }
 
-        function toggleScheduleDone(id) {
+        /* 本人が「できた！」を押したときの記録処理（完了時刻と押下回数を記録） */
+        function recordSchedulePress(id) {
             const item = appData.schedules.find(s => s.id === id);
-            if (item) {
-                item.done = !item.done;
-                if (item.done) {
-                    if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
-                    speakText(`${item.title}、よくできました！`);
-                }
+            if (!item) return;
+
+            const now = new Date();
+            const currentTimeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (!Array.isArray(item.pressLogs)) item.pressLogs = [];
+            item.pressLogs.push(currentTimeStr);
+
+            if (!item.done) {
+                item.done = true;
+                item.completedAt = currentTimeStr;
+                if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
+                speakText(`${currentTimeStr}、${item.title}、よくできました！`);
+            } else {
+                speakText(`${item.title}は、${item.completedAt}に完了していますよ。安心してくださいね。`);
+            }
+
+            saveData();
+            renderSchedule();
+        }
+
+        function resetSingleSchedule(id) {
+            const item = appData.schedules.find(s => s.id === id);
+            if (item && confirm(`「${item.title}」の完了記録をリセットして未完了に戻しますか？`)) {
+                item.done = false;
+                item.completedAt = null;
+                item.pressLogs = [];
                 saveData();
                 renderSchedule();
             }
@@ -799,7 +928,7 @@
             const time = document.getElementById('input-time').value;
             const title = document.getElementById('input-title').value;
 
-            appData.schedules.push({ id: Date.now(), category: cat, time: time, title: title, done: false });
+            appData.schedules.push({ id: Date.now(), category: cat, time: time, title: title, done: false, completedAt: null, pressLogs: [] });
             appData.schedules.sort((a, b) => a.time.localeCompare(b.time));
 
             document.getElementById('input-title').value = '';
@@ -809,9 +938,11 @@
         }
 
         function deleteSchedule(id) {
-            appData.schedules = appData.schedules.filter(s => s.id !== id);
-            saveData();
-            renderSchedule();
+            if (confirm("この予定を削除しますか？")) {
+                appData.schedules = appData.schedules.filter(s => s.id !== id);
+                saveData();
+                renderSchedule();
+            }
         }
 
         function renderContacts() {
@@ -972,10 +1103,10 @@
             if (game === 'patakara') initPatakaraGame();
         }
 
-        /* 1. 足踏み体操 */
+        /* 1. 足踏み体操（安全なテンポに調整） */
         let cogniTimer = null;
         let cogniCount = 1;
-        let cogniSpeedMs = 1000;
+        let cogniSpeedMs = 1200;
 
         function setCogniSpeed(speedMs, mode) {
             cogniSpeedMs = speedMs;
@@ -1010,16 +1141,24 @@
                         cogniTimer = null;
                         cogniCount = 1;
                         if (playText) playText.innerText = "体操スタート";
-                        incrementExerciseDone('cogni'); // 加算処理
+                        incrementExerciseDone('cogni');
                         speakText("お疲れ様でした！足踏み体操達成です！");
                         if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
                     }
                     document.getElementById('cogni-count-num').innerText = cogniCount;
+                    const hint = document.getElementById('cogni-action-hint');
+                    if (cogniCount % 3 === 0) {
+                        hint.innerText = "👏 手をたたく！";
+                        hint.className = "text-xl font-black text-red-600 mt-1";
+                    } else {
+                        hint.innerText = "あしぶみ";
+                        hint.className = "text-xl font-extrabold text-slate-600 mt-1";
+                    }
                 }, cogniSpeedMs);
             }
         }
 
-        /* 2. グーチョキパー（左右手あそび） */
+        /* 2. グーチョキパー */
         const handIcons = ['✊', '✌️', '✋'];
         
         function nextHandsRound(addCount = true) {
@@ -1030,7 +1169,7 @@
             document.getElementById('hands-left-icon').innerText = leftHand;
             
             if (addCount) {
-                incrementExerciseDone('hands'); // 加算処理
+                incrementExerciseDone('hands');
                 speakText("達成です！つぎのお題です！");
                 if (typeof confetti === 'function') confetti({ particleCount: 30, spread: 40 });
             } else {
@@ -1038,7 +1177,7 @@
             }
         }
 
-        /* 3. 口の体操（音声認識判定強化） */
+        /* 3. 口の体操 */
         const patakaraChars = ['パ', 'タ', 'カ', 'ラ'];
         const patakaraMatchMap = {
             'パ': ['パ', 'ぱ', 'パー', 'ぱー', 'pa', 'ば', 'バ'],
@@ -1125,7 +1264,7 @@
                 speakText(`つぎは「${char}」です`);
             } else {
                 speakText("お見事！口の体操クリアです！");
-                incrementExerciseDone('patakara'); // 加算処理
+                incrementExerciseDone('patakara');
                 if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
                 if (isListening) toggleVoiceRecognition();
                 setTimeout(initPatakaraGame, 1000);
@@ -1145,7 +1284,7 @@
         function checkJankenAnswer(userHand) {
             document.getElementById('janken-result-msg').innerText = "⭕ 大正解！";
             speakText("大正解！");
-            incrementExerciseDone('janken'); // 加算処理
+            incrementExerciseDone('janken');
             if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 50 });
             setTimeout(nextJankenRound, 1500);
         }
@@ -1175,7 +1314,7 @@
                 currentTargetNum++;
                 if (currentTargetNum > 6) {
                     speakText("パーフェクト！");
-                    incrementExerciseDone('numbers'); // 加算処理
+                    incrementExerciseDone('numbers');
                     if (typeof confetti === 'function') confetti({ particleCount: 50, spread: 60 });
                     setTimeout(initNumbersGame, 1500);
                 } else {
@@ -1316,17 +1455,44 @@
             if (captionEl) speakText(captionEl.innerText);
         }
 
+        /* スマホの高画質写真を自動リサイズ・圧縮して保存エラーを防止 */
         function handleGalleryPhotoSelect(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(evt) {
-                galleryBase64Temp = evt.target.result;
-                const imgPreview = document.getElementById('gallery-preview-img');
-                const containerPreview = document.getElementById('gallery-preview-container');
-                if (imgPreview) imgPreview.src = galleryBase64Temp;
-                if (containerPreview) containerPreview.classList.remove('hidden');
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    galleryBase64Temp = canvas.toDataURL('image/jpeg', 0.7);
+                    const imgPreview = document.getElementById('gallery-preview-img');
+                    const containerPreview = document.getElementById('gallery-preview-container');
+                    if (imgPreview) imgPreview.src = galleryBase64Temp;
+                    if (containerPreview) containerPreview.classList.remove('hidden');
+                };
+                img.src = evt.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -1359,21 +1525,46 @@
             }
         }
 
-        function recordHealth(type) {
-            healthStatus = type === 'genki' ? '元気！' : (type === 'futsuu' ? 'ふつう' : 'だるい');
-            document.getElementById('health-status-badge').innerText = healthStatus;
-            document.getElementById('health-status-badge').className = "text-xs font-bold px-2 py-1 bg-emerald-600 text-white rounded-lg";
-            speakText(`体調は「${healthStatus}」ですね。記録しました！`);
-            renderStamps();
+        function recordHealth(label) {
+            appData.healthStatus = label;
+            speakText(`きょうの状態は「${label}」ですね。記録しました！`);
             saveData();
+            renderWaterAndHealth();
+            renderStamps();
         }
 
+        /* 水分補給：1杯追加＋時刻記録 */
         function addWaterGlass() {
-            waterCount++;
-            document.getElementById('water-count-display').innerText = waterCount;
-            speakText(`水分補給${waterCount}杯目！`);
-            if (waterCount === 5 && typeof confetti === 'function') confetti({ particleCount: 70, spread: 80 });
-            renderAll();
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (!Array.isArray(appData.waterLogs)) appData.waterLogs = [];
+
+            appData.waterCount = (appData.waterCount || 0) + 1;
+            appData.waterLogs.push(timeStr);
+
+            speakText(`水分補給${appData.waterCount}杯目！`);
+            if (appData.waterCount === 5 && typeof confetti === 'function') {
+                confetti({ particleCount: 70, spread: 80 });
+            }
+
+            saveData();
+            renderWaterAndHealth();
+            renderStamps();
+        }
+
+        /* 水分補給：間違えたときに1杯もどす */
+        function removeWaterGlass() {
+            if (!appData.waterCount || appData.waterCount <= 0) return;
+
+            appData.waterCount -= 1;
+            if (Array.isArray(appData.waterLogs) && appData.waterLogs.length > 0) {
+                appData.waterLogs.pop();
+            }
+
+            speakText(`1杯もどして、${appData.waterCount}杯にしました`);
+            saveData();
+            renderWaterAndHealth();
+            renderStamps();
         }
 
         function switchElderlyTab(tab) {
@@ -1412,7 +1603,7 @@
                 closeModeSwitchModal();
                 switchToCaregiverMode();
             } else {
-                alert("暗証番号が違います。");
+                alert("暗証番号違います。");
             }
         }
 
