@@ -172,7 +172,7 @@
 
             <!-- 体調＆水分 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 心身の体調チェック -->
+                <!-- 心身の体調チェック（パターンB：6つの具体的な選択肢） -->
                 <div class="bg-white border-4 border-emerald-600 rounded-3xl p-4 shadow-md space-y-2 text-slate-900">
                     <div class="flex justify-between items-center border-b-2 border-emerald-100 pb-2">
                         <span class="text-lg font-black text-emerald-950 flex items-center">
@@ -181,17 +181,23 @@
                         <span id="health-status-badge" class="text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg">未選択</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button onclick="recordHealth('元気！')" class="py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-extrabold rounded-2xl border-2 border-emerald-400 flex items-center justify-center space-x-2">
-                            <span class="text-2xl">😊</span><span class="text-base">元気！</span>
+                        <button onclick="recordHealth('元気・いつも通り')" class="py-2.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-950 font-extrabold rounded-2xl border-2 border-emerald-400 flex items-center justify-center space-x-1.5">
+                            <span class="text-xl">😊</span><span class="text-sm md:text-base">元気・いつも通り</span>
                         </button>
-                        <button onclick="recordHealth('ふつう')" class="py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-950 font-extrabold rounded-2xl border-2 border-blue-400 flex items-center justify-center space-x-2">
-                            <span class="text-2xl">🙂</span><span class="text-base">ふつう</span>
+                        <button onclick="recordHealth('食欲がない')" class="py-2.5 px-2 bg-orange-50 hover:bg-orange-100 text-orange-950 font-extrabold rounded-2xl border-2 border-orange-400 flex items-center justify-center space-x-1.5">
+                            <span class="text-xl">🍚</span><span class="text-sm md:text-base">食欲がない</span>
                         </button>
-                        <button onclick="recordHealth('だるい・よくない')" class="py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-extrabold rounded-2xl border-2 border-amber-400 flex items-center justify-center space-x-2">
-                            <span class="text-2xl">🥺</span><span class="text-sm">だるい・よくない</span>
+                        <button onclick="recordHealth('眠れなかった')" class="py-2.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-extrabold rounded-2xl border-2 border-indigo-400 flex items-center justify-center space-x-1.5">
+                            <span class="text-xl">💤</span><span class="text-sm md:text-base">眠れなかった</span>
                         </button>
-                        <button onclick="recordHealth('気分が晴れない')" class="py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 font-extrabold rounded-2xl border-2 border-purple-400 flex items-center justify-center space-x-2">
-                            <span class="text-2xl">☁️</span><span class="text-sm">気分が晴れない</span>
+                        <button onclick="recordHealth('ふらつく・めまい')" class="py-2.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-950 font-extrabold rounded-2xl border-2 border-rose-400 flex items-center justify-center space-x-1.5">
+                            <span class="text-xl">💫</span><span class="text-sm md:text-base">ふらつく・めまい</span>
+                        </button>
+                        <button onclick="recordHealth('体がだるい・痛い')" class="py-2.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-950 font-extrabold rounded-2xl border-2 border-amber-400 flex items-center justify-center space-x-1.5">
+                            <span class="text-xl">😣</span><span class="text-sm md:text-base">体がだるい・痛い</span>
+                        </button>
+                        <button onclick="recordHealth('気分が晴れない')" class="py-2.5 px-2 bg-purple-50 hover:bg-purple-100 text-purple-950 font-extrabold rounded-2xl border-2 border-purple-400 flex items-center justify-center space-x-1.5">
+                            <span class="text-xl">☁️</span><span class="text-sm md:text-base">気分が晴れない</span>
                         </button>
                     </div>
                 </div>
@@ -425,6 +431,19 @@
                 </button>
             </div>
 
+            <!-- 本日の体調・気分履歴（介護者確認用） -->
+            <div class="bg-white p-6 rounded-3xl border-4 border-emerald-600 shadow-md space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="text-xl font-black text-emerald-950 flex items-center">
+                        <i class="fas fa-heartbeat text-emerald-600 mr-2"></i>🩺 本日の体調・気分「選択履歴」
+                    </h3>
+                    <span id="caregiver-health-latest" class="text-sm font-black bg-emerald-100 text-emerald-900 px-3 py-1 rounded-lg">現在: 未選択</span>
+                </div>
+                <div id="caregiver-health-logs" class="text-sm font-bold text-slate-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                    まだ記録がありません
+                </div>
+            </div>
+
             <!-- 予定の完了時刻・押下回数履歴（介護者確認用） -->
             <div class="bg-white p-6 rounded-3xl border-4 border-blue-600 shadow-md space-y-3">
                 <div class="flex justify-between items-center border-b pb-2">
@@ -592,6 +611,7 @@
             waterCount: 0,
             waterLogs: [],
             healthStatus: '',
+            healthLogs: [],
             exerciseTargets: { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 },
             exerciseDone: { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 },
             messages: [
@@ -649,6 +669,7 @@
                     if (typeof appData.waterCount !== 'number') appData.waterCount = 0;
                     if (!Array.isArray(appData.waterLogs)) appData.waterLogs = [];
                     if (!appData.healthStatus) appData.healthStatus = '';
+                    if (!Array.isArray(appData.healthLogs)) appData.healthLogs = [];
                     if (!appData.exerciseTargets) appData.exerciseTargets = { cogni: 1, hands: 1, patakara: 1, janken: 1, numbers: 1 };
                     if (!appData.exerciseDone) appData.exerciseDone = { cogni: 0, hands: 0, patakara: 0, janken: 0, numbers: 0 };
                     if (!appData.contacts) appData.contacts = [];
@@ -675,6 +696,7 @@
                 appData.waterCount = 0;
                 appData.waterLogs = [];
                 appData.healthStatus = '';
+                appData.healthLogs = [];
             }
             appData.lastDateStr = todayStr;
             saveData();
@@ -776,6 +798,22 @@
                 } else {
                     badge.innerText = "未選択";
                     badge.className = "text-xs font-bold px-2 py-1 bg-emerald-100 text-emerald-800 rounded-lg";
+                }
+            }
+
+            const caregiverHealthLatest = document.getElementById('caregiver-health-latest');
+            if (caregiverHealthLatest) {
+                caregiverHealthLatest.innerText = appData.healthStatus ? `現在: ${appData.healthStatus}` : "現在: 未選択";
+            }
+
+            const caregiverHealthLogs = document.getElementById('caregiver-health-logs');
+            if (caregiverHealthLogs) {
+                if (appData.healthLogs && appData.healthLogs.length > 0) {
+                    caregiverHealthLogs.innerHTML = appData.healthLogs
+                        .map(log => `<span class="inline-block bg-white border border-emerald-300 px-2.5 py-1 rounded-lg mr-2 mb-1"><strong>${log.time}</strong>：${log.status}</span>`)
+                        .join('');
+                } else {
+                    caregiverHealthLogs.innerText = "まだ記録がありません";
                 }
             }
         }
@@ -1525,8 +1563,15 @@
             }
         }
 
+        /* 体調・気分の記録＋時刻履歴 */
         function recordHealth(label) {
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (!Array.isArray(appData.healthLogs)) appData.healthLogs = [];
+
             appData.healthStatus = label;
+            appData.healthLogs.push({ time: timeStr, status: label });
+
             speakText(`きょうの状態は「${label}」ですね。記録しました！`);
             saveData();
             renderWaterAndHealth();
@@ -1603,7 +1648,7 @@
                 closeModeSwitchModal();
                 switchToCaregiverMode();
             } else {
-                alert("暗証番号違います。");
+                alert("暗証番号が違います。");
             }
         }
 
